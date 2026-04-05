@@ -6,9 +6,9 @@ If Allah wills, this repository contains notes from our weekly sessions where ki
 
 ## Sessions
 
-| # | Date | Notes |
-|---|------|-------|
-| 1 | April 04, 2026 | [Session 1](sessions/session-01/README.md) |
+| # | Date | Topic | Learning Outcomes | Notes |
+|---|------|-------|-------------------|-------|
+| 1 | April 04, 2026 | Introduction to Technology — Language, Devices & Robot Navigation (~4.25 hrs) | Every device speaks a fixed, limited language; extending what a machine can do means defining new instructions precisely | [Session 1](sessions/session-01/README.md) |
 
 ---
 
