@@ -40,6 +40,25 @@ R DL DR DL DR DL DR F F L F R F F DR DR R DR
 DR R DR DL DR DL DR F F L F R F F DR DR R DR
 DR R DR L DR R DR L DR R DR F F L F R F F DR DR R DR
 
+```
+      _ _
+     |_  | 
+/\   _ | |_ _
+  \/          \
+```
+**When Facing ->**
+DL DR DR DL F L F L F R F R F F R F F L F F DR
+**When Facing ^**
+R DL DR DR DL F L F L F R F R F F R F F L F F DR
+DR R DR DR DL F L F L F R F R F F R F F L F F DR
+
+```
+   _  
+_ | |_
+   _ _| |
+  |_ _ _|
+```
+
 
 **Observations:**
 
@@ -79,11 +98,10 @@ We briefly discussed how three bits map to the numbers **0 through 7**, and walk
 **Binary addition (+1):**
 
 ```
-101 + 1 = ?
-011 + 1 = ?
-001 + 1 = ?
-010 + 1 = ?
-111 + 1 = ?
+0111 + 1 = ?
+1010 + 1 = ?
+1111 + 1 = ?
+1011 + 1 = ?
 ```
 
 **Observations:**
@@ -134,7 +152,7 @@ ______                   |                 |
 
 Students were asked to write assembly code for:
 - `5 + 6`
-- `10 + 17`
+- `11 + 17`
 
 **Three-number addition — teacher example then challenge:**
 
@@ -150,9 +168,9 @@ Add A, B;
 ```
 
 Students were then challenged to write code for:
-- `10 + 6 + 7`
-- `5 + 9 + 8`
-- `14 + 12 + 8`
+- `10 + 5 + 3`
+- `11 + 17 + 7`
+- `15 + 18 + 7 + 1`
 
 Students were given time to work through it. Some came back multiple times to discuss; others finished quickly and were waiting to move on.
 
@@ -161,7 +179,7 @@ Students were given time to work through it. Some came back multiple times to di
 Without any explanation, students were told that `Sub` is used for subtraction, and asked to write code for:
 
 ```
-10 + 5 - 7
+5 + 7 + 6 - 1 - 5
 ```
 
 - The student who finished **fastest and correctly** would receive **two chocolates**
