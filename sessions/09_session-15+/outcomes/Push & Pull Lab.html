@@ -1,0 +1,1159 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Push & Pull Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&family=Atkinson+Hyperlegible:wght@400;700&display=swap">
+<style>
+:root{
+  color-scheme: light;
+  --bg:#E6F1F8; --grid:#D2E3EE; --card:#FFFFFF; --ink:#1B2A4A; --muted:#4F5E7B;
+  --push:#D9480F; --pull:#127F8E; --sun:#FFC93C; --good:#2E8B47; --bad:#C93434; --gold:#C98A00;
+  --display:"Baloo 2","Trebuchet MS",system-ui,sans-serif;
+  --body:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{background:var(--bg)}
+body{
+  font-family:var(--body); color:var(--ink); font-size:16px; line-height:1.5;
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:26px 26px;
+  padding-inline:16px; padding-block:20px 48px;
+}
+.wrap{max-width:980px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
+
+header.top{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.brand h1{font-family:var(--display);font-weight:800;font-size:clamp(32px,6vw,48px);line-height:.95;margin:0;letter-spacing:-.5px}
+.brand h1 .p{color:var(--push)} .brand h1 .l{color:var(--pull)}
+.brand p{margin:6px 0 0;color:var(--muted);font-size:15px}
+.top-right{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.pill{font-family:var(--display);font-weight:800;background:var(--card);border:2px solid var(--ink);border-radius:999px;padding:3px 14px;font-size:16px;font-variant-numeric:tabular-nums}
+.pill .st{color:var(--gold)}
+.ghost{background:var(--card);border:2px solid var(--ink);border-radius:999px;padding:3px 14px;font-weight:700;font-size:15px}
+
+nav.levels{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+@media (max-width:680px){nav.levels{grid-template-columns:repeat(2,1fr)}}
+.lv{text-align:left;background:var(--card);border:2.5px solid var(--ink);border-radius:14px;padding:9px 12px;box-shadow:3px 3px 0 var(--ink);display:flex;flex-direction:column;gap:0;transition:transform .08s,box-shadow .08s}
+.lv:hover{transform:translate(-1px,-1px);box-shadow:4px 4px 0 var(--ink)}
+.lv[aria-selected="true"]{background:var(--sun)}
+.lv .n{font-size:12px;text-transform:uppercase;letter-spacing:.08em;font-weight:700;color:var(--muted)}
+.lv[aria-selected="true"] .n{color:var(--ink)}
+.lv .t{font-family:var(--display);font-weight:800;font-size:19px;line-height:1.15}
+.lv .s{font-size:15px;font-weight:700;color:var(--gold);font-variant-numeric:tabular-nums}
+.lv[aria-selected="true"] .s{color:var(--ink)}
+
+.stage-card{background:var(--card);border:2.5px solid var(--ink);border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:12px;box-shadow:5px 5px 0 var(--ink)}
+.lesson h2{font-family:var(--display);font-weight:800;font-size:clamp(22px,3.4vw,28px);margin:0;line-height:1.1;text-wrap:balance}
+.lesson p{margin:4px 0 0;max-width:68ch;color:var(--muted)}
+.lvpick{display:flex;flex-wrap:wrap;gap:8px}
+.lp{display:flex;flex-direction:column;align-items:flex-start;text-align:left;background:var(--bg);border:2px solid var(--ink);border-radius:10px;padding:4px 12px;min-width:132px;line-height:1.2}
+.lp .a{font-size:11px;text-transform:uppercase;letter-spacing:.08em;font-weight:700;color:var(--muted)}
+.lp .b{font-family:var(--display);font-weight:800;font-size:16px}
+.lp .c{font-size:13px;letter-spacing:1px;color:var(--gold)}
+.lp[aria-pressed="true"]{background:var(--ink);color:#fff}
+.lp[aria-pressed="true"] .a{color:#C9D3E6}
+.lp[aria-pressed="true"] .c{color:var(--sun)}
+.stage{position:relative;width:100%;aspect-ratio:16/9;border-radius:12px;overflow:hidden;border:2px solid var(--ink);background:#BFE3F5;outline:none}
+.stage:focus-visible{box-shadow:0 0 0 4px var(--sun)}
+.stage canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+#pic{position:absolute;inset:0;background:#F3F8FB;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:10px}
+#pic svg{height:82%;width:auto;max-width:100%}
+#pic .cap{font-family:var(--display);font-weight:800;font-size:clamp(15px,3vw,24px);line-height:1.1;text-align:center}
+.overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(27,42,74,.5);padding:12px}
+.ov-card{background:var(--card);border:2.5px solid var(--ink);border-radius:16px;padding:16px 20px;max-width:470px;width:100%;text-align:center;box-shadow:4px 4px 0 var(--ink);display:flex;flex-direction:column;gap:8px;align-items:center;max-height:100%;overflow:auto}
+.ov-card h3{font-family:var(--display);font-weight:800;font-size:clamp(20px,3.6vw,28px);margin:0;line-height:1.1;text-wrap:balance}
+.ov-card p{margin:0;font-size:clamp(14px,2.2vw,16px)}
+.ov-stars{font-size:32px;letter-spacing:4px;color:var(--gold);line-height:1}
+.ov-btns{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+
+.big{font-family:var(--display);font-weight:800;font-size:18px;line-height:1.2;border:2.5px solid var(--ink);border-radius:12px;padding:8px 18px;background:var(--sun);box-shadow:3px 3px 0 var(--ink);color:var(--ink)}
+.big:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--ink)}
+.big.push{background:var(--push);color:#fff}
+.big.pull{background:var(--pull);color:#fff}
+.big.go{background:var(--good);color:#fff}
+.big.plain{background:var(--card)}
+.big.right{background:var(--good);color:#fff}
+.big.wrong{background:var(--bad);color:#fff}
+.big:disabled{opacity:.45;cursor:default;transform:none;box-shadow:3px 3px 0 var(--ink)}
+.big.right:disabled,.big.wrong:disabled{opacity:1}
+.hold{touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;min-width:120px}
+
+.hud{display:flex;flex-wrap:wrap;gap:8px}
+.chip{display:flex;flex-direction:column;border:2px solid var(--ink);border-radius:10px;padding:3px 12px;min-width:100px;background:var(--bg)}
+.chip .k{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:700}
+.chip .v{font-family:var(--display);font-weight:800;font-size:20px;line-height:1.15;font-variant-numeric:tabular-nums}
+.controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.keyhint{color:var(--muted);font-size:14px}
+kbd{font-family:var(--body);font-weight:700;border:1.5px solid var(--muted);border-bottom-width:3px;border-radius:6px;padding:0 6px;font-size:13px;background:var(--card);color:var(--ink)}
+
+.qbox{width:100%;display:flex;flex-direction:column;gap:10px}
+.qprompt{font-family:var(--display);font-weight:800;font-size:clamp(18px,2.6vw,22px);line-height:1.2;margin:0;text-wrap:balance}
+.ansrow{display:flex;flex-wrap:wrap;gap:10px}
+.fb{margin:0;max-width:68ch}
+.fb b{font-family:var(--display);font-size:18px}
+.fb.good b{color:var(--good)} .fb.bad b{color:var(--bad)}
+
+section.facts h2{font-family:var(--display);font-weight:800;font-size:22px;margin:0 0 8px}
+.fact-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px}
+.fact{background:var(--card);border:2px solid var(--ink);border-radius:12px;padding:10px 12px}
+.fact h3{font-family:var(--display);font-weight:800;font-size:18px;margin:0;line-height:1.2}
+.fact p{margin:2px 0 0;font-size:14.5px;color:var(--muted)}
+.fact.push h3{color:var(--push)} .fact.pull h3{color:var(--pull)}
+.note{font-size:14px;color:var(--muted);margin:8px 0 0}
+@media (prefers-reduced-motion:reduce){.lv,.big{transition:none}}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <h1><span class="p">Push</span> &amp; <span class="l">Pull</span> Lab</h1>
+      <p>Four games to practise how forces move, slow and stop things.</p>
+    </div>
+    <div class="top-right">
+      <span class="pill" id="starTotal"><span class="st">★</span> 0 / 36</span>
+      <button class="ghost" id="soundBtn" type="button" aria-pressed="true">Sound: on</button>
+    </div>
+  </header>
+
+  <nav class="levels" id="tabs" role="tablist" aria-label="Games"></nav>
+
+  <section class="stage-card" aria-live="polite">
+    <div class="lesson">
+      <h2 id="lvTitle">Loading</h2>
+      <p id="lvLesson"></p>
+    </div>
+    <div class="lvpick" id="lvPick" role="group" aria-label="Choose a level"></div>
+    <div class="stage" id="stage" tabindex="0" aria-label="Game area">
+      <canvas id="cv"></canvas>
+      <div id="pic" hidden></div>
+      <div class="overlay" id="overlay" hidden></div>
+    </div>
+    <div class="hud" id="hud"></div>
+    <div class="controls" id="controls"></div>
+  </section>
+
+  <section class="facts">
+    <h2>Force words</h2>
+    <div class="fact-grid">
+      <div class="fact push"><h3>Push</h3><p>A force that moves something away from you.</p></div>
+      <div class="fact pull"><h3>Pull</h3><p>A force that moves something toward you.</p></div>
+      <div class="fact"><h3>Friction</h3><p>A force that slows things down when two surfaces rub. Rough surfaces like gravel and sand have lots of friction. Smooth ice has very little.</p></div>
+      <div class="fact"><h3>Gravity</h3><p>A pull toward the Earth. It makes things fall, and pulls them back down a hill.</p></div>
+      <div class="fact"><h3>Magnetic force</h3><p>A magnet pulls iron and steel things, even without touching them.</p></div>
+    </div>
+    <p class="note">Scientists measure force in newtons (N). Braking a car takes thousands of newtons. Pushing a door open takes about 20 N.</p>
+  </section>
+</div>
+
+<script>
+(() => {
+const W = 800, H = 450;
+const C = { ink:'#1B2A4A', push:'#D9480F', pull:'#127F8E', sun:'#FFC93C', good:'#2E8B47', bad:'#C93434', brown:'#6B4E2E', muted:'#4F5E7B', grav:'#6D4AC9' };
+const cv = document.getElementById('cv'), ctx = cv.getContext('2d');
+const stage = document.getElementById('stage');
+const ov = document.getElementById('overlay');
+const pic = document.getElementById('pic');
+const hud = document.getElementById('hud');
+const ctr = document.getElementById('controls');
+const lvPick = document.getElementById('lvPick');
+const keys = {};
+let cur = null;
+
+/* ---------- helpers ---------- */
+function el(tag, cls, txt){ const e=document.createElement(tag); if(cls) e.className=cls; if(txt!=null) e.textContent=txt; return e; }
+function starStr(n){ return '★'.repeat(n) + '☆'.repeat(3-n); }
+function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const ease=t=>t<0?0:t>1?1:t*t*(3-2*t);
+const fmtN=n=>Math.round(n).toLocaleString('en-US');
+
+function resize(){
+  const r = stage.getBoundingClientRect(), d = window.devicePixelRatio || 1;
+  cv.width = Math.max(1, Math.round(r.width*d)); cv.height = Math.max(1, Math.round(r.height*d));
+}
+new ResizeObserver(resize).observe(stage); resize();
+
+/* storage (per-viewer convenience only) */
+let best = {};
+try { best = JSON.parse(localStorage.getItem('pushpull-best') || '{}') || {}; } catch(e){ best = {}; }
+['rock','car','ball','quiz'].forEach(id=>{ if(best[id] && !best[id+'-0']) best[id+'-0']=best[id]; });
+function getBest(id,lv){ return best[id+'-'+lv]||0; }
+function saveBest(id, lv, s){
+  const k=id+'-'+lv;
+  if(!(best[k] >= s)){ best[k] = s; try{ localStorage.setItem('pushpull-best', JSON.stringify(best)); }catch(e){} }
+  renderTabs(); renderLevelPicker();
+}
+
+/* sound */
+let actx = null, soundOn = true;
+function tone(f, d=.12, type='sine', vol=.14, delay=0){
+  if(!soundOn) return;
+  try{
+    actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+    const t = actx.currentTime + delay, o = actx.createOscillator(), g = actx.createGain();
+    o.type = type; o.frequency.setValueAtTime(f, t);
+    g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(.001, t+d);
+    o.connect(g).connect(actx.destination); o.start(t); o.stop(t+d+.03);
+  }catch(e){}
+}
+const sfx = {
+  good(){ tone(660,.12,'triangle'); tone(880,.2,'triangle',.14,.1); },
+  bad(){ tone(210,.3,'square',.07); },
+  kick(){ tone(130,.09,'square',.12); tone(90,.12,'sine',.18); },
+  bump(){ tone(95,.14,'square',.1); },
+  win(){ [523,659,784,1046].forEach((f,i)=>tone(f,.18,'triangle',.13,i*.11)); }
+};
+const soundBtn = document.getElementById('soundBtn');
+soundBtn.addEventListener('click', () => { soundOn = !soundOn; soundBtn.textContent = 'Sound: ' + (soundOn?'on':'off'); soundBtn.setAttribute('aria-pressed', soundOn); });
+
+/* overlay */
+function showOverlay({title, text, stars=null, btn='Start', onBtn, btn2, onBtn2}){
+  ov.innerHTML = '';
+  const card = el('div','ov-card');
+  card.append(el('h3',null,title));
+  if(stars!=null) card.append(el('div','ov-stars',starStr(stars)));
+  if(text) card.append(el('p',null,text));
+  const row = el('div','ov-btns');
+  const b = el('button','big',btn); b.type='button';
+  b.addEventListener('click', () => { hideOverlay(); stage.focus({preventScroll:true}); onBtn && onBtn(); });
+  row.append(b);
+  if(btn2){ const b2 = el('button','big plain',btn2); b2.type='button'; b2.addEventListener('click',()=>{ hideOverlay(); stage.focus({preventScroll:true}); onBtn2 && onBtn2(); }); row.append(b2); }
+  card.append(row); ov.append(card); ov.hidden = false;
+  setTimeout(()=>b.focus({preventScroll:true}), 30);
+}
+function hideOverlay(){ ov.hidden = true; }
+/* end-of-level overlay with "next level" */
+function levelDone(game, {title, text, stars}){
+  if(stars>0) saveBest(game.id, game.lv, stars);
+  const hasNext = game.lv < game.levels.length-1;
+  if(hasNext) showOverlay({ title, text, stars, btn:'Next level →', onBtn:()=>setLevel(game.lv+1), btn2:'Play again', onBtn2:()=>game.init(true) });
+  else showOverlay({ title, text, stars, btn:'Play again', onBtn:()=>game.init(true) });
+}
+
+/* HUD */
+let hudEls = {};
+function setHud(list){
+  hud.innerHTML=''; hudEls={};
+  list.forEach(([id,label])=>{ const c=el('div','chip'); c.append(el('span','k',label)); const v=el('span','v','–'); c.append(v); hud.append(c); hudEls[id]=v; });
+}
+function hs(id, val, color){ const e=hudEls[id]; if(!e) return; val=String(val); if(e.textContent!==val) e.textContent=val; const col=color||''; if(e.style.color!==col) e.style.color=col; }
+
+/* control buttons */
+function holdBtn(label, code, cls){
+  const b = el('button','big hold '+(cls||''),label); b.type='button';
+  const off = () => { keys[code]=false; };
+  b.addEventListener('pointerdown', e => { e.preventDefault(); keys[code]=true; try{ b.setPointerCapture(e.pointerId); }catch(_){} });
+  b.addEventListener('pointerup', off); b.addEventListener('pointercancel', off); b.addEventListener('lostpointercapture', off);
+  b.addEventListener('contextmenu', e => e.preventDefault());
+  return b;
+}
+function hint(html){ const s=el('span','keyhint'); s.innerHTML=html; return s; }
+
+/* keyboard */
+const GAME_KEYS = ['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Space'];
+addEventListener('keydown', e => {
+  const playing = cur && cur.usesKeys && cur.phase==='play';
+  if(GAME_KEYS.includes(e.code)){
+    keys[e.code] = true;
+    if(playing) e.preventDefault();
+  }
+  if(playing && !e.repeat && cur.onKey && cur.onKey(e.code)) e.preventDefault();
+});
+addEventListener('keyup', e => { keys[e.code] = false; });
+addEventListener('blur', () => { for(const k in keys) keys[k]=false; });
+
+/* ---------- canvas drawing helpers ---------- */
+function line(c,a,b){ c.beginPath(); c.moveTo(a[0],a[1]); c.lineTo(b[0],b[1]); c.stroke(); }
+function labelBox(c, text, x, y, color, size=16, keepIn=true){
+  c.save();
+  c.font = `800 ${size}px "Baloo 2", "Trebuchet MS", sans-serif`;
+  const tw = c.measureText(text).width;
+  if(keepIn) x = clamp(x, tw/2+12, W-tw/2-12);
+  c.fillStyle='#fff'; c.strokeStyle=color; c.lineWidth=2.5;
+  c.beginPath(); c.roundRect(x-tw/2-9, y-size-4, tw+18, size+10, 8); c.fill(); c.stroke();
+  c.fillStyle=color; c.textAlign='center'; c.textBaseline='middle'; c.fillText(text, x, y-size/2+1);
+  c.restore();
+}
+function arrow(c, x1,y1,x2,y2, color, label, w=10){
+  const a=Math.atan2(y2-y1,x2-x1), len=Math.hypot(x2-x1,y2-y1); if(len<6) return;
+  const hl=Math.min(24,len*.55);
+  c.save(); c.strokeStyle=color; c.fillStyle=color; c.lineWidth=w; c.lineCap='round';
+  c.beginPath(); c.moveTo(x1,y1); c.lineTo(x2-Math.cos(a)*hl*.8, y2-Math.sin(a)*hl*.8); c.stroke();
+  c.beginPath(); c.moveTo(x2,y2);
+  c.lineTo(x2-Math.cos(a-.5)*hl, y2-Math.sin(a-.5)*hl);
+  c.lineTo(x2-Math.cos(a+.5)*hl, y2-Math.sin(a+.5)*hl); c.closePath(); c.fill();
+  c.restore();
+  if(label){
+    const mx=(x1+x2)/2, my=(y1+y2)/2;
+    if(Math.abs(y2-y1) > Math.abs(x2-x1)) labelBox(c,label,mx+80,my+8,color,16);
+    else labelBox(c,label,mx,my-12,color,16);
+  }
+}
+function smallText(c,text,x,y,color){ c.save(); c.fillStyle=color; c.font='800 15px "Baloo 2",sans-serif'; c.textAlign='center'; c.fillText(text,x,y); c.restore(); }
+function flashText(c,f){ if(!f) return; c.save(); c.globalAlpha=clamp(f.t*2.5,0,1); labelBox(c,f.text,W/2,86,f.color||C.ink,28); c.restore(); }
+function sky(c,top,bot){ const g=c.createLinearGradient(0,0,0,H); g.addColorStop(0,top); g.addColorStop(1,bot); c.fillStyle=g; c.fillRect(0,0,W,H); }
+function cloud(c,x,y,s){ c.fillStyle='rgba(255,255,255,.92)'; c.beginPath(); [[0,0,18],[22,-9,23],[46,0,17],[22,4,16]].forEach(([dx,dy,r])=>{ c.moveTo(x+dx*s+r*s,y+dy*s); c.arc(x+dx*s,y+dy*s,r*s,0,Math.PI*2); }); c.fill(); }
+function backdrop(c,g){
+  sky(c,'#9ED3EE','#E4F5FB');
+  c.fillStyle='#FFE08A'; c.beginPath(); c.arc(700,64,32,0,Math.PI*2); c.fill();
+  cloud(c,90,74,1); cloud(c,390,50,.8); cloud(c,560,100,.6);
+  c.fillStyle='#C3E3B6'; c.beginPath(); c.moveTo(0,g-60); c.quadraticCurveTo(200,g-150,400,g-70); c.quadraticCurveTo(600,g-140,800,g-65); c.lineTo(800,H); c.lineTo(0,H); c.fill();
+}
+function outdoor(c,g){
+  backdrop(c,g);
+  c.fillStyle='#86C46B'; c.fillRect(0,g,W,H-g); c.fillStyle='#6FAE55'; c.fillRect(0,g,W,6);
+}
+function drawKid(c, x, g, o={}){
+  const lean=o.lean||0, face=o.face||1, shirt=o.shirt||C.push, ph=o.walk||0;
+  const hip=[x,g-42], sh=[x+lean,g-80], head=[x+lean*1.25,g-98];
+  const f1=[x-9+Math.sin(ph)*12,g], f2=[x+9-Math.sin(ph)*12,g];
+  if(o.kick!=null){ f2[0]=x+10+o.kick*30*face; f2[1]=g-4-o.kick*18; f1[0]=x-8; }
+  const hands = o.hands || [[sh[0]+Math.sin(ph)*12, sh[1]+34],[sh[0]-Math.sin(ph)*12, sh[1]+34]];
+  c.save(); c.lineCap='round'; c.lineJoin='round';
+  c.strokeStyle='#2F3E66'; c.lineWidth=8; line(c,hip,f1); line(c,hip,f2);
+  c.fillStyle=C.ink; [f1,f2].forEach(f=>{ c.beginPath(); c.ellipse(f[0]+4*face,f[1]-2,8,4,0,0,Math.PI*2); c.fill(); });
+  c.strokeStyle=shirt; c.lineWidth=17; line(c,hip,sh);
+  c.strokeStyle='#E0A987'; c.lineWidth=6.5; hands.forEach(h=>line(c,[sh[0],sh[1]+4],h));
+  c.fillStyle='#F2C59E'; c.strokeStyle=C.ink; c.lineWidth=2.5; c.beginPath(); c.arc(head[0],head[1],13,0,Math.PI*2); c.fill(); c.stroke();
+  c.fillStyle=C.ink; c.beginPath(); c.arc(head[0],head[1]-1,13,Math.PI,0); c.closePath(); c.fill();
+  c.beginPath(); c.arc(head[0]+5*face,head[1]+3,2,0,Math.PI*2); c.fill();
+  c.restore();
+}
+function toyCar(c,x,y,col,wheel=0){
+  c.save(); c.strokeStyle=C.ink; c.lineWidth=2.5; c.fillStyle=col;
+  c.beginPath(); c.roundRect(x-28,y-27,56,17,5); c.fill(); c.stroke();
+  c.beginPath(); c.roundRect(x-14,y-39,28,14,5); c.fill(); c.stroke();
+  c.fillStyle='#BFE6F6'; c.fillRect(x-9,y-36,18,8);
+  [x-16,x+16].forEach(wx=>{ c.fillStyle=C.ink; c.beginPath(); c.arc(wx,y-8,8,0,Math.PI*2); c.fill(); c.strokeStyle='#C9CFD9'; c.lineWidth=2; line(c,[wx,y-8],[wx+Math.cos(wheel)*6,y-8+Math.sin(wheel)*6]); });
+  c.restore();
+}
+
+/* =========================================================
+   GAME 1 — MOVE THE ROCK (hills + rough and smooth ground)
+   ========================================================= */
+const GRAV=420, PUSH_A=480;
+const ROCK_SURF={
+  grass:{ n:'Grass', k:180, top:'#5FA046', fill:'#86C46B' },
+  ice:{ n:'Smooth ice', k:45, top:'#9CD9EE', fill:'#DDF3FB', label:'SMOOTH ICE · less friction', lc:C.pull },
+  gravel:{ n:'Rough gravel', k:260, top:'#6F6A64', fill:'#ABA59D', label:'ROUGH GRAVEL · more friction', lc:C.brown }
+};
+const RockLevel = {
+  id:'rock', name:'Move the Rock', usesKeys:true,
+  title:'Push or pull the rock',
+  lesson:'A push moves something away from you. A pull brings it toward you. Rough ground makes the rock harder to move. Smooth ice makes it slide. Going up a hill, gravity pulls the rock back down.',
+  levels:[
+    { name:'Flat field', rounds:4, t3:30, t2:50, start:260, hills:[], patches:[['gravel',330,440],['ice',560,680]],
+      intro:'Flat ground with a rough gravel patch and a smooth ice patch. Gravel has more friction, so you need to push harder. On ice the rock keeps sliding, so let go early!' },
+    { name:'One hill', rounds:5, t3:45, t2:70, start:240, hills:[[470,60,170]], patches:[['gravel',190,290],['ice',650,780]],
+      intro:'Now there is a hill. Pushing uphill is hard because gravity pulls the rock back down. Downhill, gravity helps you.' },
+    { name:'Bumpy hills', rounds:5, t3:55, t2:85, start:225, hills:[[330,32,130],[630,55,165]], patches:[['gravel',240,420],['ice',500,585]],
+      intro:'Two hills! One is covered in rough gravel. The other has smooth ice on its slope. A rock left on icy slope slides back down, because ice has too little friction to hold it.' }
+  ],
+  lv:0,
+  get L(){ return this.levels[this.lv]; },
+  groundY(x){ let y=372; for(const [c,Hh,w] of this.L.hills){ const d=x-c; if(Math.abs(d)<w) y-=Hh*(1+Math.cos(Math.PI*d/w))/2; } return y; },
+  slope(x){ let s=0; for(const [c,Hh,w] of this.L.hills){ const d=x-c; if(Math.abs(d)<w) s+=Hh*Math.PI/(2*w)*Math.sin(Math.PI*d/w); } return s; },
+  surf(x){ for(const [t,a,b] of this.L.patches) if(x>=a&&x<b) return t; return 'grass'; },
+  gravX(x){ return GRAV*Math.sin(Math.atan(this.slope(x))); },
+  init(quick){
+    this.R=46; this.round=0; this.total=this.L.rounds; this.time=0;
+    this.rx=this.L.start; this.v=0; this.kidX=this.rx-this.R-34; this.walk=0; this.mode=null; this.last='push'; this.settle=0; this.flash=null;
+    this.shape=[]; for(let i=0;i<14;i++) this.shape.push([i/14*Math.PI*2, .86+Math.random()*.16]);
+    this.newZone();
+    setHud([['round','Round'],['force','Your force'],['ground','Ground'],['speed','Rock speed'],['time','Time']]);
+    ctr.innerHTML=''; ctr.append(holdBtn('← Pull','ArrowLeft','pull'), holdBtn('Push →','ArrowRight','push'), hint('or hold <kbd>←</kbd> and <kbd>→</kbd>'));
+    this.phase='intro';
+    if(quick){ this.phase='play'; return; }
+    showOverlay({ title:`Level ${this.lv+1}: ${this.L.name}`, text:`Hold → to PUSH the rock away from you. Hold ← to PULL it back with the rope. Park it on the yellow flag ${this.total} times. ${this.L.intro}`, btn:'Start', onBtn:()=>{ this.phase='play'; } });
+  },
+  canRest(x){ for(let dx=-40;dx<=40;dx+=10){ const s=ROCK_SURF[this.surf(x+dx)]; if(Math.abs(this.gravX(x+dx))>=s.k*1.2-10) return false; } return true; },
+  newZone(){
+    for(let i=0;i<400;i++){ const x=250+Math.random()*470; if(Math.abs(x-this.rx)<160) continue; if(this.canRest(x)){ this.zx=x; this.zw=110; return; } }
+    this.zx=this.rx>480?300:650; this.zw=110;
+  },
+  update(dt){
+    if(this.flash){ this.flash.t-=dt; if(this.flash.t<=0) this.flash=null; }
+    if(this.phase!=='play') return;
+    this.time+=dt;
+    const R=this.R, r=!!keys.ArrowRight, l=!!keys.ArrowLeft;
+    let F=0; this.mode=null;
+    if(r&&!l){ F=1; this.mode='push'; } else if(l&&!r){ F=-1; this.mode='pull'; }
+    if(this.mode) this.last=this.mode;
+    const s=ROCK_SURF[this.surf(this.rx)], k=s.k, ks=k*1.2, gx=this.gravX(this.rx);
+    const applied=F*PUSH_A+gx, VMAX=260;
+    let v=this.v;
+    if(v!==0){ const nv=v+(applied-Math.sign(v)*k)*dt; v=(Math.sign(nv)!==Math.sign(v))?0:nv; }
+    else if(Math.abs(applied)>ks){ v=(applied-Math.sign(applied)*k)*dt; }
+    v=clamp(v,-VMAX,VMAX);
+    this.rx+=v*dt;
+    const min=R+160, max=W-R-24;
+    if(this.rx<min){ this.rx=min; v=0; } if(this.rx>max){ this.rx=max; v=0; }
+    this.v=v;
+    const left=this.geom().left[0];
+    const target = this.last==='pull' ? left-110 : left-30;
+    const nk=this.kidX+(target-this.kidX)*Math.min(1,dt*10);
+    this.walk+=Math.abs(nk-this.kidX)*.12; this.kidX=nk;
+    const inZone=Math.abs(this.rx-this.zx) < this.zw/2-12;
+    if(inZone && v===0 && F===0){ this.settle+=dt; if(this.settle>.3) this.scored(); } else this.settle=0;
+    hs('round', `${Math.min(this.round+1,this.total)} / ${this.total}`);
+    hs('force', this.mode==='push'?'PUSH →':this.mode==='pull'?'← PULL':'none', this.mode==='push'?C.push:this.mode==='pull'?C.pull:'');
+    const sn=ROCK_SURF[this.surf(this.rx)]; hs('ground', Math.abs(gx)>40 ? sn.n+' hill' : sn.n, this.surf(this.rx)==='ice'?C.pull:this.surf(this.rx)==='gravel'?C.brown:'');
+    hs('speed', (Math.abs(v)/60).toFixed(1)+' m/s');
+    hs('time', this.time.toFixed(1)+' s');
+  },
+  scored(){
+    this.round++; this.settle=0; sfx.good();
+    this.flash={ text:['Nice parking!','On the flag!','Great work!','Super!','Perfect!'][this.round%5], t:1.1, color:C.good };
+    if(this.round>=this.total){
+      this.phase='done'; sfx.win();
+      const L=this.L, s=this.time<L.t3?3:this.time<L.t2?2:1;
+      hs('round',`${this.total} / ${this.total}`);
+      levelDone(this,{ title:`Level ${this.lv+1} complete!`, stars:s, text:`Your time: ${this.time.toFixed(1)} seconds. Under ${L.t3} s earns 3 stars. Pushing moved the rock away from you, and pulling brought it back. Rough gravel and uphill slopes needed more force.` });
+    } else this.newZone();
+  },
+  geom(){
+    const R=this.R, rx=this.rx, th=Math.atan(this.slope(rx)), P=[rx,this.groundY(rx)];
+    const n=[Math.sin(th),-Math.cos(th)], tg=[Math.cos(th),Math.sin(th)];
+    const cen=[P[0]+n[0]*R*.78, P[1]+n[1]*R*.78];
+    const left=[cen[0]-tg[0]*R*.92, cen[1]-tg[1]*R*.92];
+    return {th,P,n,tg,cen,left};
+  },
+  drawTerrain(c){
+    const gy=x=>this.groundY(x);
+    c.beginPath(); c.moveTo(0,H); for(let x=0;x<=W;x+=4) c.lineTo(x,gy(x)); c.lineTo(W,H); c.closePath(); c.fillStyle='#86C46B'; c.fill();
+    c.fillStyle='#78B85E'; for(let x=12;x<W;x+=37){ if(this.surf(x)==='grass') c.fillRect(x,gy(x)+20+((x*7)%30),10,3); }
+    this.L.patches.forEach(([t,a,b])=>{
+      const s=ROCK_SURF[t];
+      c.beginPath(); c.moveTo(a,H); for(let x=a;x<=b;x+=4) c.lineTo(x,gy(x)); c.lineTo(b,gy(b)); c.lineTo(b,H); c.closePath(); c.fillStyle=s.fill; c.fill();
+      if(t==='gravel'){ for(let i=0;i<70;i++){ const x=a+((i*37)%(b-a)), y=gy(x)+6+((i*23)%60); c.fillStyle=i%2?'#7F7972':'#C8C2B8'; c.beginPath(); c.ellipse(x,y,3+(i%3),2+(i%2),0,0,Math.PI*2); c.fill(); } }
+      if(t==='ice'){ c.strokeStyle='rgba(255,255,255,.95)'; c.lineWidth=3; for(let x=a+14;x<b-20;x+=34){ line(c,[x,gy(x)+26],[x+16,gy(x)+14]); line(c,[x+8,gy(x)+50],[x+18,gy(x)+42]); } }
+    });
+    c.lineWidth=7; c.lineCap='butt';
+    for(let x=0;x<W;x+=4){ c.strokeStyle=ROCK_SURF[this.surf(x+2)].top; line(c,[x,gy(x)+2],[x+4,gy(x+4)+2]); }
+    this.L.patches.forEach(([t,a,b])=>{ const s=ROCK_SURF[t], m=(a+b)/2; labelBox(c,s.label,m,Math.min(H-6,gy(m)+54),s.lc,14); });
+  },
+  draw(c){
+    const R=this.R, gy=x=>this.groundY(x);
+    backdrop(c,372);
+    this.drawTerrain(c);
+    // zone + flag
+    const za=this.zx-this.zw/2, zb=this.zx+this.zw/2;
+    c.strokeStyle='rgba(255,201,60,.95)'; c.lineWidth=12; c.lineCap='round'; c.beginPath(); for(let x=za;x<=zb;x+=5){ x===za?c.moveTo(x,gy(x)+4):c.lineTo(x,gy(x)+4); } c.stroke();
+    c.strokeStyle='#B07F00'; c.lineWidth=2; c.setLineDash([7,5]); c.beginPath(); for(let x=za;x<=zb;x+=5){ x===za?c.moveTo(x,gy(x)+11):c.lineTo(x,gy(x)+11); } c.stroke(); c.setLineDash([]);
+    const fy=gy(this.zx);
+    c.strokeStyle=C.ink; c.lineWidth=4; c.lineCap='round'; line(c,[this.zx,fy],[this.zx,fy-150]);
+    c.fillStyle=C.sun; c.strokeStyle=C.ink; c.lineWidth=2.5; c.beginPath(); c.moveTo(this.zx,fy-150); c.lineTo(this.zx+46,fy-134); c.lineTo(this.zx,fy-118); c.closePath(); c.fill(); c.stroke();
+    const G=this.geom(), kx=this.kidX, kg=gy(kx);
+    // rope
+    if(this.last==='pull'){
+      const h=[kx+16,kg-60], a=G.left, sag=this.mode==='pull'?1:16;
+      c.strokeStyle='#A8783F'; c.lineWidth=4; c.lineCap='round'; c.beginPath(); c.moveTo(h[0],h[1]); c.quadraticCurveTo((h[0]+a[0])/2,(h[1]+a[1])/2+sag,a[0],a[1]); c.stroke();
+    }
+    // rock
+    c.fillStyle='rgba(0,0,0,.15)'; c.beginPath(); c.ellipse(G.P[0],G.P[1]+3,R*1.05,6,G.th,0,Math.PI*2); c.fill();
+    c.save(); c.translate(G.P[0],G.P[1]); c.rotate(G.th);
+    const cy=-R*.78;
+    c.beginPath();
+    this.shape.forEach(([a,k],i)=>{ const px=Math.cos(a)*R*k, py=Math.min(0,cy+Math.sin(a)*R*k*.95); i?c.lineTo(px,py):c.moveTo(px,py); });
+    c.closePath(); c.fillStyle='#8C929C'; c.fill(); c.strokeStyle=C.ink; c.lineWidth=3; c.stroke();
+    c.fillStyle='#A9AFB8'; c.beginPath(); c.ellipse(-12,cy-14,16,9,-.4,0,Math.PI*2); c.fill();
+    c.fillStyle='#737983'; c.beginPath(); c.ellipse(16,cy+12,10,6,.3,0,Math.PI*2); c.fill();
+    c.restore();
+    // kid
+    let pose;
+    if(this.last==='push') pose={ lean:this.mode==='push'?12:4, hands:[[G.left[0]+2,G.left[1]-10],[G.left[0]+4,G.left[1]+2]] };
+    else pose={ lean:this.mode==='pull'?-12:-2, hands:[[kx+16,kg-60],[kx+20,kg-62]] };
+    drawKid(c,kx,kg,{...pose, walk:this.walk, face:1, shirt:C.push});
+    // force arrows
+    const ay=G.cen[1]-R-36, rx=this.rx;
+    if(this.mode==='push') arrow(c,rx-40,ay,rx+70,ay,C.push,'PUSH');
+    if(this.mode==='pull') arrow(c,rx+40,ay,rx-70,ay,C.pull,'PULL');
+    const gx=this.gravX(rx);
+    if(Math.abs(gx)>40){
+      const d=Math.sign(gx), e=[G.cen[0]+G.tg[0]*d*62, G.cen[1]+G.tg[1]*d*62];
+      arrow(c,G.cen[0],G.cen[1],e[0],e[1],C.grav,null,6);
+      labelBox(c,'gravity',e[0]+d*28,e[1]+4,C.grav,13);
+    }
+    if(this.v!==0){
+      const d=-Math.sign(this.v), k=ROCK_SURF[this.surf(rx)].k, len=18+k/260*55, y=G.P[1]+26;
+      arrow(c,rx+d*6,y,rx+d*(6+len),y,C.brown,null,6);
+      smallText(c,'friction',rx+d*(6+len/2),y+22,C.brown);
+    }
+    flashText(c,this.flash);
+  }
+};
+
+/* =========================================================
+   GAME 2 — STOP THE CAR (levels, speed breakers, rough/smooth road)
+   ========================================================= */
+const ROAD={
+  asphalt:{ n:'Road', grip:8000, roll:.35, col:'#4B5266' },
+  gravel:{ n:'Rough gravel', grip:7000, roll:1.6, col:'#8E8A83', label:'ROUGH GRAVEL · more friction', lc:C.brown },
+  ice:{ n:'Smooth ice', grip:2200, roll:.08, col:'#CFEFFA', label:'SMOOTH ICE · brakes slip', lc:C.pull }
+};
+const CarLevel = {
+  id:'car', name:'Stop the Car', usesKeys:true,
+  title:'Stop the speeding car',
+  lesson:'The engine pushes the car forward. The brakes push back to slow it down. A bigger force changes the speed faster. Slow down for speed breakers, and watch out: on smooth ice the brakes cannot grip.',
+  levels:[
+    { name:'City street', len:400, v:[18,27], zone:[350,368], bumps:[], patches:[], limit:60,
+      intro:'A long city street. Hold ↑ for gas to push the car forward, and hold Space to brake. Stop the front of the car in the green box at the end of the road before the 60 seconds run out.' },
+    { name:'School zone', len:600, v:[16,22], zone:[548,565], bumps:[110,240,380,500], patches:[['gravel',280,330]], limit:60,
+      intro:'Four speed breakers! Slow down below 30 km/h before you drive over each one, then use the gas to speed up again. Rough gravel has more friction and slows the car down. You have 60 seconds.' },
+    { name:'Winter road', len:800, v:[16,22], zone:[745,758], bumps:[100,240,380,520,650], patches:[['gravel',160,210],['gravel',430,480],['ice',690,735]], limit:60,
+      intro:'Five speed breakers, two gravel patches and an icy patch just before the stop box. Ice is smooth, so the tyres have little friction. The brakes cannot push back as hard, and the car takes much longer to stop. Slow down before the ice! You have 60 seconds.' }
+  ],
+  lv:0,
+  get L(){ return this.levels[this.lv]; },
+  roadAt(m){ for(const [t,a,b] of this.L.patches) if(m>=a&&m<b) return t; return 'asphalt'; },
+  init(quick){
+    this.round=0; this.total=3; this.wins=0; this.phase='intro'; this.flash=null;
+    this.newRound();
+    setHud([['round','Round'],['speed','Speed'],['force','Force'],['road','Road'],['time','Time left']]);
+    ctr.innerHTML=''; ctr.append(holdBtn('Brake','Space','push'), holdBtn('Gas','ArrowUp','go'), hint('or hold <kbd>Space</kbd> to brake and <kbd>↑</kbd> for gas'));
+    this.updateHud();
+    if(quick){ this.ready(); return; }
+    showOverlay({ title:`Level ${this.lv+1}: ${this.L.name}`, text:this.L.intro, btn:'Start', onBtn:()=>this.ready() });
+  },
+  newRound(){
+    const L=this.L;
+    this.x=0; this.v=L.v[0]+Math.random()*(L.v[1]-L.v[0]); this.za=L.zone[0]+Math.random()*(L.zone[1]-L.zone[0]); this.zb=this.za+10;
+    this.wall=L.len; this.t=0; this.limit=L.limit; this.F=0; this.E=0; this.skids=[]; this.wheel=0; this.crash=false; this.cam=0; this.settle=0; this.slip=false; this.lift=0;
+  },
+  ready(){ this.phase='ready'; const bumps=this.L.bumps.length; showOverlay({ title:`Round ${this.round+1} of ${this.total}`, text:`The car is going ${Math.round(this.v*3.6)} km/h. Stop it in the green box within ${this.limit} seconds.${bumps?` Go over ${bumps===1?'the speed breaker':'each speed breaker'} slower than 30 km/h.`:''}`, btn:'Go!', onBtn:()=>{ this.phase='play'; } }); },
+  updateHud(){
+    hs('round',`${Math.min(this.round+1,this.total)} / ${this.total}`);
+    const kmh=Math.round(this.v*3.6), nextB=this.L.bumps.find(b=>b>this.x);
+    hs('speed',kmh+' km/h', nextB!=null && nextB-this.x<45 && kmh>30 ? C.bad : '');
+    if(this.F>this.E) hs('force','Brakes '+fmtN(Math.min(this.F,ROAD[this.roadAt(this.x)].grip))+' N',C.push);
+    else if(this.E>0) hs('force','Engine '+fmtN(Math.min(this.E,ROAD[this.roadAt(this.x)].grip))+' N',C.good);
+    else hs('force','0 N');
+    const rt=this.roadAt(this.x); hs('road',ROAD[rt].n, rt==='ice'?C.pull:rt==='gravel'?C.brown:'');
+    const left=Math.max(0,this.limit-this.t); hs('time',left.toFixed(1)+' s', left<3?C.bad:'');
+  },
+  update(dt){
+    if(this.flash){ this.flash.t-=dt; if(this.flash.t<=0) this.flash=null; }
+    this.lift*=Math.pow(.02,dt);
+    if(this.phase!=='play') return;
+    this.t+=dt;
+    const br=keys.Space||keys.ArrowDown, gas=(keys.ArrowUp||keys.ArrowRight)&&!br;
+    this.F=clamp(this.F+(br?16000:-24000)*dt,0,8000);
+    this.E=clamp(this.E+(gas?12000:-20000)*dt,0,4000);
+    const road=ROAD[this.roadAt(this.x)];
+    const brake=Math.min(this.F,road.grip), eng=Math.min(this.E,road.grip);
+    this.slip = this.F>road.grip+200 && this.v>0;
+    const px=this.x;
+    let a=(eng-brake)/1000;
+    if(this.v>0||eng>0) a-=road.roll;
+    this.v=clamp(this.v+a*dt,0,28);
+    this.x+=this.v*dt; this.wheel+=this.v*dt;
+    if((brake>4500||this.slip) && this.v>0){ const s=this.skids[this.skids.length-1]; if(s && this.x-s[1]<1) s[1]=this.x; else this.skids.push([this.x,this.x]); }
+    // speed breakers: check front and rear wheels
+    for(const b of this.L.bumps){
+      for(const off of [4.3,15]){ if(px-off<b && this.x-off>=b){ this.lift=Math.min(10,3+this.v*.5); sfx.bump(); } }
+      if(px<b && this.x>=b){
+        if(this.v*3.6>31){ this.updateHud(); return this.end(false,'Too fast over the speed breaker!',`You hit it at ${Math.round(this.v*3.6)} km/h. Brake before the speed breaker so you cross it slower than 30 km/h.`); }
+        this.flash={ text:'Nice and slow!', t:.9, color:C.good };
+      }
+    }
+    this.cam=clamp(this.x-40,0,Math.max(0,this.L.len+6-124));
+    this.updateHud();
+    if(this.x>=this.wall){ this.x=this.wall; this.v=0; this.crash=true; return this.end(false,'Crash!','The car hit the wall. Start braking earlier, and push harder.'); }
+    if(this.v===0 && this.E===0){
+      if(this.x>=this.za && this.x<=this.zb){ this.settle+=dt; if(this.settle>.3) return this.end(true,'Perfect stop!',`You stopped the car in ${this.t.toFixed(1)} seconds.`); }
+      else if(this.x>this.zb) return this.end(false,'Past the box','You stopped after the green box. Brake a bit earlier or harder.');
+    } else this.settle=0;
+    if(this.t>=this.limit) return this.end(false,"Time's up",'You did not stop in the box in time. Use the gas to go faster on clear road, and a bigger brake force to stop sooner.');
+  },
+  end(ok,title,text){
+    this.phase='end'; this.F=0; this.E=0; this.slip=false; this.updateHud();
+    if(ok){ this.wins++; sfx.good(); } else sfx.bad();
+    this.flash={ text:title, t:1.4, color:ok?C.good:C.bad };
+    this.round++;
+    const lv=this.lv;
+    setTimeout(()=>{
+      if(cur!==this || this.lv!==lv) return;
+      if(this.round>=this.total){
+        if(this.wins===3) sfx.win();
+        levelDone(this,{ title:`${this.wins} of ${this.total} perfect stops`, stars:this.wins, text:`${title} ${text} Remember: a bigger force changes the speed faster, and smooth surfaces give less grip.` });
+      } else {
+        showOverlay({ title, text, btn:'Next round', onBtn:()=>{ this.newRound(); this.updateHud(); this.ready(); } });
+      }
+    }, 900);
+  },
+  draw(c){
+    const cam=this.cam, P=m=>40+(m-cam)*6.1, vis=m=>P(m)>-60&&P(m)<W+60;
+    sky(c,'#A9D9F1','#E8F6FB'); cloud(c,120,60,.8); cloud(c,520,45,1);
+    const sp=cam*6.1*.35;
+    c.fillStyle='#C5DAE8';
+    [[10,160,70],[95,120,60],[165,185,80],[260,140,50],[320,100,90],[430,170,60],[505,130,70],[590,150,80],[680,110,100]].forEach(([x,y,w])=>{ const xx=((x-sp)%900+900)%900-60; c.fillRect(xx,y,w,286-y); });
+    c.fillStyle='#D5D9E0'; c.fillRect(0,284,W,18); c.fillStyle='#A9AFBB'; c.fillRect(0,300,W,4);
+    c.fillStyle=ROAD.asphalt.col; c.fillRect(0,304,W,112);
+    // road patches
+    this.L.patches.forEach(([t,a,b])=>{
+      const r=ROAD[t], x1=P(a), x2=P(b); if(x2<0||x1>W) return;
+      c.fillStyle=r.col; c.fillRect(x1,304,x2-x1,112);
+      if(t==='gravel'){ for(let i=0;i<90;i++){ const x=x1+((i*29)%Math.max(1,(x2-x1))), y=310+((i*41)%100); c.fillStyle=i%2?'#6F6A64':'#B9B3AA'; c.beginPath(); c.ellipse(x,y,3,2,0,0,Math.PI*2); c.fill(); } }
+      if(t==='ice'){ c.strokeStyle='rgba(255,255,255,.95)'; c.lineWidth=3; for(let x=x1+12;x<x2-20;x+=40){ line(c,[x,340],[x+18,326]); line(c,[x+10,396],[x+24,386]); } }
+      labelBox(c,r.label,(x1+x2)/2,280,r.lc,14,false);
+    });
+    c.fillStyle='#E9EDF3'; const dash=((-cam*6.1)%50+50)%50; for(let x=dash-50;x<W;x+=50) c.fillRect(x+10,358,26,4);
+    c.fillStyle='#7CC36A'; c.fillRect(0,416,W,34);
+    c.fillStyle=C.ink; c.font='700 13px "Atkinson Hyperlegible",sans-serif'; c.textAlign='center';
+    for(let m=0;m<=this.L.len;m+=20){ if(!vis(m)) continue; c.fillRect(P(m)-1,416,2,8); c.fillText(m+' m',P(m),440); }
+    // speed breakers + signs
+    this.L.bumps.forEach(b=>{
+      const x=P(b); if(x<-80||x>W+80) return;
+      for(let i=0;i<8;i++){ c.fillStyle=i%2?C.ink:C.sun; c.fillRect(x-6,304+i*14,12,14); }
+      c.fillStyle=C.sun; c.strokeStyle=C.ink; c.lineWidth=2; c.beginPath(); c.ellipse(x,404,11,6,0,Math.PI,0); c.fill(); c.stroke();
+      const sx=P(b-10);
+      c.strokeStyle='#7D8796'; c.lineWidth=4; line(c,[sx,300],[sx,238]);
+      c.save(); c.translate(sx,222); c.rotate(Math.PI/4); c.fillStyle=C.sun; c.strokeStyle=C.ink; c.lineWidth=2.5; c.fillRect(-15,-15,30,30); c.strokeRect(-15,-15,30,30); c.restore();
+      c.fillStyle=C.ink; c.beginPath(); c.ellipse(sx,228,9,6,0,Math.PI,0); c.fill(); c.fillRect(sx-12,228,24,2.5);
+      c.fillStyle='#fff'; c.strokeStyle=C.bad; c.lineWidth=3; c.beginPath(); c.arc(sx,186,13,0,Math.PI*2); c.fill(); c.stroke();
+      c.fillStyle=C.ink; c.font='800 13px "Baloo 2",sans-serif'; c.textAlign='center'; c.fillText('30',sx,191);
+      c.strokeStyle='#7D8796'; c.lineWidth=3; line(c,[sx,199],[sx,207]);
+    });
+    // zone
+    const zx=P(this.za), zw=P(this.zb)-zx;
+    c.fillStyle='rgba(46,139,71,.42)'; c.fillRect(zx,304,zw,112);
+    c.strokeStyle='#7FE09A'; c.lineWidth=3; c.setLineDash([8,6]); c.strokeRect(zx,305,zw,110); c.setLineDash([]);
+    c.fillStyle='#fff'; c.font='800 18px "Baloo 2",sans-serif'; c.textAlign='center'; c.fillText('STOP',zx+zw/2,330);
+    // wall
+    const wx=P(this.wall);
+    if(wx<W+40){
+      c.fillStyle='#B5533C'; c.fillRect(wx,214,28,202);
+      c.strokeStyle='#8A3B29'; c.lineWidth=2; for(let y=224;y<416;y+=14){ line(c,[wx,y],[wx+28,y]); const o=((y-224)/14)%2?6:20; line(c,[wx+o,y-14],[wx+o,y]); }
+    }
+    // skids
+    c.strokeStyle='rgba(15,15,20,.55)'; c.lineWidth=5; c.lineCap='round';
+    this.skids.forEach(([a,b])=>{ [-92,-26].forEach(off=>line(c,[P(a)+off,404],[P(b)+off,404])); });
+    // car
+    const fx=P(this.x);
+    if(this.v>6 && this.phase==='play'){ c.strokeStyle='rgba(255,255,255,.8)'; c.lineWidth=3; for(let i=0;i<3;i++){ const y=350+i*16, l=10+this.v*1.6; line(c,[fx-135-l,y],[fx-130,y]); } }
+    this.drawCar(c,fx,404-this.lift);
+    if(this.crash){ c.fillStyle=C.sun; c.strokeStyle=C.bad; c.lineWidth=3; c.beginPath(); for(let i=0;i<16;i++){ const a=i/16*Math.PI*2, r=i%2?16:34; c.lineTo(fx+Math.cos(a)*r, 360+Math.sin(a)*r); } c.closePath(); c.fill(); c.stroke(); }
+    const grip=ROAD[this.roadAt(this.x)].grip;
+    if(this.F>30 && this.F>=this.E){ const f=Math.min(this.F,grip), len=26+f/8000*120; arrow(c,fx-6,316,fx-6-len,316,C.push,'Brakes push back'); }
+    else if(this.E>30){ const f=Math.min(this.E,grip), len=26+f/8000*120; arrow(c,fx-150,316,fx-150+len,316,C.good,'Engine pushes'); }
+    if(this.slip) labelBox(c,'Sliding! Ice is too smooth to grip',fx-60,270,C.pull,15);
+    // timer bar
+    const frac=clamp(1-this.t/this.limit,0,1);
+    c.fillStyle='rgba(27,42,74,.25)'; c.beginPath(); c.roundRect(20,16,W-40,14,7); c.fill();
+    c.fillStyle=frac>.4?C.good:frac>.2?'#E39B00':C.bad; c.beginPath(); c.roundRect(20,16,Math.max(14,(W-40)*frac),14,7); c.fill();
+    c.fillStyle=C.ink; c.font='800 15px "Baloo 2",sans-serif'; c.textAlign='left'; c.fillText('TIME',22,48);
+    // road map: where the car is on the long road
+    const mx0=90, mx1=W-24, my=44, MX=m=>mx0+(mx1-mx0)*m/this.L.len;
+    c.fillStyle='rgba(27,42,74,.35)'; c.beginPath(); c.roundRect(mx0,my-3,mx1-mx0,6,3); c.fill();
+    this.L.patches.forEach(([t,a,b])=>{ c.fillStyle=t==='ice'?'#9CD9EE':'#9C968E'; c.fillRect(MX(a),my-3,MX(b)-MX(a),6); });
+    c.fillStyle=C.good; c.fillRect(MX(this.za),my-6,Math.max(4,MX(this.zb)-MX(this.za)),12);
+    this.L.bumps.forEach(b=>{ c.fillStyle=C.sun; c.strokeStyle=C.ink; c.lineWidth=1.5; c.beginPath(); c.arc(MX(b),my,4,0,Math.PI*2); c.fill(); c.stroke(); });
+    c.fillStyle=C.ink; c.beginPath(); c.arc(MX(this.x),my,6,0,Math.PI*2); c.fill();
+    c.fillStyle=C.sun; c.beginPath(); c.arc(MX(this.x),my,3,0,Math.PI*2); c.fill();
+    flashText(c,this.flash);
+  },
+  drawCar(c,fx,gy){
+    const x=fx-122; c.save(); c.lineJoin='round';
+    c.fillStyle='rgba(0,0,0,.2)'; c.beginPath(); c.ellipse(x+62,406,64,5,0,0,Math.PI*2); c.fill();
+    c.fillStyle=C.sun; c.strokeStyle=C.ink; c.lineWidth=3;
+    c.beginPath(); c.moveTo(x+4,gy-14); c.lineTo(x+4,gy-40); c.quadraticCurveTo(x+6,gy-47,x+18,gy-48); c.lineTo(x+32,gy-48); c.lineTo(x+48,gy-72); c.lineTo(x+88,gy-72); c.lineTo(x+104,gy-48); c.lineTo(x+114,gy-46); c.quadraticCurveTo(x+122,gy-42,x+122,gy-30); c.lineTo(x+122,gy-14); c.closePath(); c.fill(); c.stroke();
+    c.fillStyle='#BFE6F6'; c.beginPath(); c.moveTo(x+40,gy-50); c.lineTo(x+52,gy-66); c.lineTo(x+66,gy-66); c.lineTo(x+66,gy-50); c.closePath(); c.fill(); c.stroke();
+    c.beginPath(); c.moveTo(x+72,gy-50); c.lineTo(x+72,gy-66); c.lineTo(x+85,gy-66); c.lineTo(x+97,gy-50); c.closePath(); c.fill(); c.stroke();
+    c.fillStyle='#FFF6C8'; c.beginPath(); c.ellipse(x+118,gy-36,4,6,0,0,Math.PI*2); c.fill(); c.stroke();
+    c.fillStyle=this.F>30?'#FF3B3B':C.bad; c.fillRect(x+4,gy-38,6,8);
+    [x+30,x+96].forEach(wx=>{
+      c.fillStyle='#222837'; c.beginPath(); c.arc(wx,gy-12,14,0,Math.PI*2); c.fill();
+      c.fillStyle='#C9CFD9'; c.beginPath(); c.arc(wx,gy-12,6,0,Math.PI*2); c.fill();
+      c.strokeStyle='#C9CFD9'; c.lineWidth=2; const a=this.wheel/.33;
+      for(let i=0;i<3;i++){ const aa=a+i*2.09; line(c,[wx,gy-12],[wx+Math.cos(aa)*11,gy-12+Math.sin(aa)*11]); }
+    });
+    c.restore();
+  }
+};
+
+/* =========================================================
+   GAME 3 — KEEP THE BALL ROLLING
+   ========================================================= */
+const BALL_SURF={
+  Grass:{ tip:'some friction', d:1.5, c1:'#6DBE4B', c2:'#62B042', lc:C.good },
+  Sand:{ tip:'rough · lots of friction', d:4.2, c1:'#EACF88', c2:'#E0C377', lc:C.brown },
+  Mud:{ tip:'sticky · strong friction', d:3.2, c1:'#8E6C4A', c2:'#826242', lc:C.brown },
+  Ice:{ tip:'smooth · very little friction', d:.35, c1:'#DDF3FB', c2:'#CBEAF5', lc:C.pull }
+};
+const mk=list=>list.map(([n,a,b])=>({n,a,b,...BALL_SURF[n]}));
+const CROWD=['#F2542D','#FFC93C','#FFFFFF','#48B5C4','#F28DB2','#9BD66B'];
+const BallLevel = {
+  id:'ball', name:'Keep It Rolling', usesKeys:true,
+  title:'Beat friction to the goal',
+  lesson:'Friction slows the rolling ball down until it stops. Each kick is a push that speeds it up again. Rough ground like sand and mud has more friction than smooth ice.',
+  levels:[
+    { name:'Practice pitch', goal:90, segs:mk([['Grass',0,30],['Ice',30,45],['Grass',45,60],['Sand',60,72],['Grass',72,110]]),
+      intro:'A short pitch with a smooth ice strip and a small sand patch.' },
+    { name:'Big field', goal:150, segs:mk([['Grass',0,35],['Sand',35,55],['Grass',55,80],['Mud',80,100],['Ice',100,122],['Grass',122,165]]),
+      intro:'A longer field with sand, mud and ice. Kick early on the rough patches.' },
+    { name:'Muddy cup', goal:180, segs:mk([['Grass',0,20],['Sand',20,45],['Mud',45,65],['Grass',65,80],['Sand',80,100],['Ice',100,115],['Mud',115,140],['Sand',140,160],['Grass',160,195]]),
+      intro:'Lots of rough sand and sticky mud. The ball slows down fast, so stay close and keep kicking.' }
+  ],
+  lv:0,
+  get L(){ return this.levels[this.lv]; },
+  segAt(m){ return this.L.segs.find(s=>m>=s.a&&m<s.b)||this.L.segs[this.L.segs.length-1]; },
+  init(quick){
+    this.px=2.4; this.pv=0; this.bx=4; this.bv=0; this.hearts=3; this.kicks=0; this.started=false; this.walk=0; this.kickT=0; this.cam=0; this.flash=null; this.t=0;
+    setHud([['dist','To the goal'],['speed','Ball speed'],['ground','Ground'],['hearts','Hearts'],['kicks','Kicks']]);
+    ctr.innerHTML='';
+    const kb=el('button','big push hold','Kick!'); kb.type='button';
+    kb.addEventListener('pointerdown',e=>{ e.preventDefault(); if(this.phase==='play') this.kick(); });
+    kb.addEventListener('contextmenu',e=>e.preventDefault());
+    ctr.append(holdBtn('Run →','ArrowRight','pull'), kb, hint('or hold <kbd>→</kbd> to run and press <kbd>Space</kbd> to kick'));
+    this.phase='intro';
+    if(quick){ this.phase='play'; return; }
+    showOverlay({ title:`Level ${this.lv+1}: ${this.L.name}`, text:`Kick the ball ${this.L.goal} m to the goal. Hold → to run after it and press Space to kick again before it stops. If the ball stops, you lose a heart. ${this.L.intro}`, btn:'Start', onBtn:()=>{ this.phase='play'; } });
+  },
+  onKey(code){ if(code==='Space'){ this.kick(); return true; } return false; },
+  kick(){
+    if(this.bx-this.px<=1.9){ this.bv=Math.min(this.bv+9,13); this.kicks++; this.kickT=.25; this.started=true; sfx.kick(); }
+    else this.flash={ text:'Run closer to kick!', t:.8, color:C.ink };
+  },
+  stopped(){
+    if(!this.started) return;
+    this.started=false; this.hearts--; sfx.bad();
+    if(this.hearts<=0){
+      this.phase='end'; const lv=this.lv;
+      setTimeout(()=>{ if(cur!==this||this.lv!==lv) return; showOverlay({ title:'Friction won this time', stars:0, text:`The ball stopped 3 times. You got it ${Math.floor(this.bx)} m down the field. Kick sooner, before the ball slows down too much, especially on rough sand and mud.`, btn:'Try again', onBtn:()=>this.init(true) }); },700);
+    } else this.flash={ text:'The ball stopped! −1 heart', t:1.6, color:C.bad };
+  },
+  update(dt){
+    if(this.flash){ this.flash.t-=dt; if(this.flash.t<=0) this.flash=null; }
+    if(this.kickT>0) this.kickT-=dt;
+    if(this.phase!=='play'){ this.hudUpdate(); return; }
+    this.t+=dt;
+    const G=this.L.goal, tv=keys.ArrowRight?8:0;
+    this.pv+=(tv-this.pv)*Math.min(1,dt*8);
+    this.px+=this.pv*dt; this.walk+=this.pv*dt*1.5;
+    if(this.px>this.bx-.45) this.px=this.bx-.45;
+    if(this.bv>0){
+      this.bv-=this.segAt(this.bx).d*dt;
+      if(this.bv<=0){ this.bv=0; this.stopped(); }
+      this.bx+=this.bv*dt;
+    }
+    if(this.bx>=G+1.2 && this.phase==='play'){
+      this.phase='end'; sfx.win(); this.flash={ text:'GOAL!', t:2, color:C.good };
+      const lv=this.lv;
+      setTimeout(()=>{ if(cur!==this||this.lv!==lv) return; levelDone(this,{ title:'Goal!', stars:this.hearts, text:`You beat friction with ${this.kicks} kicks and ${this.hearts} ${this.hearts===1?'heart':'hearts'} left. Every kick was a push that sped the ball up again.` }); },900);
+    }
+    const target=(this.px+this.bx)/2-20;
+    this.cam+=(target-this.cam)*Math.min(1,dt*4); this.cam=clamp(this.cam,0,G+10-40);
+    this.hudUpdate();
+  },
+  hudUpdate(){
+    const s=this.segAt(this.bx);
+    hs('dist',Math.max(0,Math.ceil(this.L.goal-this.bx))+' m');
+    hs('speed',this.bv.toFixed(1)+' m/s', this.started&&this.bv>0&&this.bv<3?C.bad:'');
+    hs('ground',s.n, s.n==='Grass'?'':s.lc);
+    hs('hearts','♥'.repeat(Math.max(0,this.hearts))+'♡'.repeat(3-Math.max(0,this.hearts)), C.bad);
+    hs('kicks',this.kicks);
+  },
+  draw(c){
+    const s=20, cam=this.cam, X=m=>(m-cam)*s, g=372, GOAL=this.L.goal;
+    sky(c,'#8FCBEA','#DDF1FA');
+    c.fillStyle='#34466F'; c.fillRect(0,112,W,108);
+    const sp=cam*s*.3;
+    for(let r=0;r<4;r++){ for(let i=0;i<46;i++){ const x=((i*19+r*9-sp)%(W+40)+W+40)%(W+40)-20; c.fillStyle=CROWD[(i*7+r*3)%CROWD.length]; c.beginPath(); c.arc(x,128+r*24,7,0,Math.PI*2); c.fill(); } }
+    c.fillStyle='#FFFFFF'; c.fillRect(0,214,W,34);
+    c.fillStyle=C.ink; c.font='800 18px "Baloo 2",sans-serif'; c.textAlign='left';
+    const bo=((-(cam*s)*.8)%260+260)%260-260; for(let x=bo;x<W;x+=260) c.fillText('PUSH & PULL CUP',x+20,238);
+    c.fillStyle='#2A3A5E'; c.fillRect(0,248,W,6);
+    this.L.segs.forEach(sg=>{ for(let m=sg.a;m<sg.b;m+=5){ const x=X(m); if(x>W||x+5*s<0) continue; c.fillStyle=(m/5)%2?sg.c1:sg.c2; c.fillRect(x,254,5*s+1,H-254);
+      if(sg.n==='Sand'){ c.fillStyle='#CBAE63'; for(let k=0;k<8;k++) c.fillRect(x+((k*37+m*3)%100),270+((k*53)%170),3,3); }
+      if(sg.n==='Mud'){ c.fillStyle='#6E5035'; for(let k=0;k<3;k++){ c.beginPath(); c.ellipse(x+20+k*30,300+((k*61+m*7)%130),12,4,0,0,Math.PI*2); c.fill(); } }
+      if(sg.n==='Ice'){ c.strokeStyle='rgba(255,255,255,.9)'; c.lineWidth=3; line(c,[x+20,300],[x+50,280]); line(c,[x+60,390],[x+80,376]); }
+    } });
+    this.L.segs.forEach((sg,i)=>{ if(i===0) return; const x=X(sg.a); if(x<-260||x>W+10) return;
+      c.strokeStyle='rgba(255,255,255,.7)'; c.lineWidth=2; c.setLineDash([6,6]); line(c,[x,254],[x,H]); c.setLineDash([]);
+      labelBox(c,`${sg.n.toUpperCase()} · ${sg.tip}`,x+130,290,sg.lc,15,false);
+    });
+    c.fillStyle='rgba(255,255,255,.85)'; c.font='700 13px "Atkinson Hyperlegible",sans-serif'; c.textAlign='center';
+    for(let m=10;m<GOAL;m+=10){ const x=X(m); if(x<-20||x>W+20) continue; c.fillRect(x-1,H-26,2,8); c.fillText(m+' m',x,H-6); }
+    const gx=X(GOAL);
+    if(gx<W+100){
+      c.strokeStyle='rgba(255,255,255,.55)'; c.lineWidth=1.5;
+      for(let k=0;k<=70;k+=10) line(c,[gx+k,g-120+k*.3],[gx+k,g+6]);
+      for(let y=g-120;y<=g;y+=12) line(c,[gx,y],[gx+70,y+18]);
+      c.strokeStyle='#fff'; c.lineWidth=7; c.lineCap='round'; line(c,[gx,g+8],[gx,g-122]); line(c,[gx,g-122],[gx+70,g-100]); line(c,[gx+70,g-100],[gx+70,g+8]);
+      c.fillStyle='#fff'; c.fillRect(gx-2,g+6,4,H-g-6);
+    }
+    const kp=this.kickT>0?Math.sin((1-this.kickT/.25)*Math.PI):null;
+    drawKid(c,X(this.px),g,{ lean:this.pv>1?9:0, walk:this.walk, kick:kp, shirt:C.pull, face:1 });
+    const bx=X(this.bx), by=g-14, a=this.bx/.35;
+    c.fillStyle='rgba(0,0,0,.2)'; c.beginPath(); c.ellipse(bx,g+2,14,4,0,0,Math.PI*2); c.fill();
+    c.fillStyle='#fff'; c.strokeStyle=C.ink; c.lineWidth=2.5; c.beginPath(); c.arc(bx,by,14,0,Math.PI*2); c.fill(); c.stroke();
+    c.fillStyle=C.ink; for(let i=0;i<3;i++){ const aa=a+i*2.09; c.beginPath(); c.arc(bx+Math.cos(aa)*8,by+Math.sin(aa)*8,3.6,0,Math.PI*2); c.fill(); }
+    c.beginPath(); c.arc(bx,by,3.2,0,Math.PI*2); c.fill();
+    if(this.bv>0){
+      const d=this.segAt(this.bx).d, len=14+d*14;
+      arrow(c,bx-2,g+26,bx-2-len,g+26,C.brown,null,6);
+      c.fillStyle='#fff'; c.font='800 14px "Baloo 2",sans-serif'; c.textAlign='center'; c.fillText('friction',bx-2-len/2,g+50);
+    }
+    if(this.phase==='play' && this.started && this.bv>0 && this.bv<3) labelBox(c,'Kick it again!',bx,by-34,C.bad,16);
+    if(this.phase==='play' && !this.started && this.kicks===0) labelBox(c,'Press Space to kick',bx+20,by-34,C.ink,16);
+    flashText(c,this.flash);
+  }
+};
+
+/* =========================================================
+   GAME 4 — FORCE QUIZ (3 levels)
+   ========================================================= */
+function room(c){
+  c.fillStyle='#EEF3F8'; c.fillRect(0,0,W,H);
+  c.fillStyle='#E1EAF2'; for(let x=0;x<W;x+=40) c.fillRect(x,0,20,394);
+  c.fillStyle='#fff'; c.strokeStyle=C.ink; c.lineWidth=3; c.beginPath(); c.roundRect(610,50,140,110,6); c.fill(); c.stroke();
+  c.fillStyle='#BFE3F5'; c.fillRect(618,58,124,94); cloud(c,640,100,.5);
+  c.strokeStyle='#fff'; c.lineWidth=5; line(c,[680,58],[680,152]); line(c,[618,105],[742,105]);
+  c.fillStyle='#C99E6E'; c.fillRect(0,400,W,50); c.fillStyle='#B98C5C'; for(let x=0;x<W;x+=90) c.fillRect(x,400,2,50);
+  c.fillStyle='#fff'; c.fillRect(0,394,W,6);
+}
+function table(c){ c.fillStyle='#A7703F'; c.fillRect(140,250,380,14); c.fillStyle='#8E5D33'; c.fillRect(160,264,14,136); c.fillRect(486,264,14,136); c.strokeStyle='rgba(0,0,0,.25)'; c.lineWidth=1; line(c,[140,264],[520,264]); }
+function pencil(c,x,y,rot){
+  c.save(); c.translate(x,y); c.rotate(rot); c.strokeStyle=C.ink; c.lineWidth=1.5;
+  c.fillStyle='#F7C331'; c.fillRect(-40,-6,70,12); c.strokeRect(-40,-6,70,12);
+  c.fillStyle='#E3AC17'; c.fillRect(-40,0,70,2);
+  c.fillStyle='#E8C39E'; c.beginPath(); c.moveTo(30,-6); c.lineTo(46,0); c.lineTo(30,6); c.closePath(); c.fill(); c.stroke();
+  c.fillStyle='#333'; c.beginPath(); c.moveTo(41,-2); c.lineTo(46,0); c.lineTo(41,2); c.closePath(); c.fill();
+  c.fillStyle='#B9C0C9'; c.fillRect(-46,-6,6,12); c.fillStyle='#F19CB0'; c.beginPath(); c.roundRect(-55,-6,9,12,3); c.fill(); c.stroke();
+  c.restore();
+}
+function magnet(c,x,y,rot){
+  c.save(); c.translate(x,y); c.rotate(rot); c.lineCap='butt';
+  c.strokeStyle=C.ink; c.lineWidth=32; c.beginPath(); c.moveTo(-30,40); c.lineTo(-30,0); c.arc(0,0,30,Math.PI,0); c.lineTo(30,40); c.stroke();
+  c.strokeStyle='#D63B3B'; c.lineWidth=26; c.stroke();
+  c.fillStyle='#C9CFD9'; c.strokeStyle=C.ink; c.lineWidth=3; c.fillRect(-43,40,26,16); c.strokeRect(-43,40,26,16); c.fillRect(17,40,26,16); c.strokeRect(17,40,26,16);
+  c.fillStyle='#fff'; c.font='800 14px "Baloo 2",sans-serif'; c.textAlign='center'; c.fillText('N',-30,30); c.fillText('S',30,30);
+  c.restore();
+}
+const SCENES=[
+  { q:'What force made the pencil fall to the floor?', watch:'Watch the pencil on the desk.', ans:'Gravity', dur:2.2,
+    why:'Gravity pulls everything toward the Earth. When the pencil rolls off the desk, nothing holds it up, so gravity pulls it down to the floor.',
+    draw(c,t,rev){
+      room(c); table(c);
+      const T1=1.3, tl=Math.sqrt(2*(393-244)/1100);
+      let x,y,rot;
+      if(t<T1){ x=300+205*ease(t/T1*1.1); y=244; rot=0; }
+      else { const tt=Math.min(t-T1,tl); x=505+70*tt; y=244+.5*1100*tt*tt; rot=tt/tl*Math.PI; }
+      if(t>T1 && t<T1+tl){ c.strokeStyle='rgba(27,42,74,.35)'; c.lineWidth=3; for(let i=0;i<3;i++) line(c,[x-20+i*20,y-30],[x-20+i*20,y-60]); }
+      pencil(c,x,y,rot);
+      if(rev) arrow(c,600,250,600,380,C.pull,'Gravity pulls down');
+    } },
+  { q:'The book slid across the table and stopped. What force stopped it?', watch:'Watch the book slide.', ans:'Friction', dur:1.9,
+    why:'Friction happens when two surfaces rub together. The table rubs against the moving book and slows it down until it stops.',
+    draw(c,t,rev){
+      room(c); table(c);
+      const T=1.5, tt=Math.min(t,T), x=170+360*tt-120*tt*tt;
+      if(t<T){ c.strokeStyle='rgba(27,42,74,.35)'; c.lineWidth=3; for(let i=0;i<3;i++) line(c,[x-60-i*6,232+i*7],[x-90-i*10,232+i*7]); }
+      c.fillStyle='#fff'; c.strokeStyle=C.ink; c.lineWidth=2.5; c.fillRect(x-44,232,88,18); c.strokeRect(x-44,232,88,18);
+      c.fillStyle='#3867D6'; c.beginPath(); c.roundRect(x-46,228,92,8,3); c.fill(); c.stroke();
+      c.beginPath(); c.roundRect(x-46,246,92,6,3); c.fill(); c.stroke();
+      c.fillStyle='#E6E9EF'; for(let i=0;i<3;i++) c.fillRect(x-40,237+i*3,84,1.5);
+      if(rev) arrow(c,x+10,288,x-80,288,C.brown,'Friction');
+    } },
+  { q:'What force made the paperclip jump up to the magnet?', watch:'Watch the magnet and the paperclip.', ans:'Magnetic', dur:2,
+    why:'A magnet pulls on things made of iron or steel, like a paperclip, even without touching them. That is magnetic force.',
+    draw(c,t,rev){
+      room(c); table(c);
+      const mx=400, my=-40+190*ease(t/1), tip=my+56;
+      const cx=mx-30, restY=244;
+      const lift=ease((t-1.25)/.3), cy=restY+(tip+7-restY)*lift;
+      if(t>1 && t<1.4){ c.strokeStyle='rgba(201,52,52,.35)'; c.lineWidth=2; c.setLineDash([4,5]); for(let i=0;i<3;i++){ c.beginPath(); c.arc(cx,tip,18+i*14,0,Math.PI); c.stroke(); } c.setLineDash([]); }
+      magnet(c,mx,my,0);
+      c.strokeStyle='#7D8796'; c.lineWidth=2.5; c.beginPath(); c.roundRect(cx-18,cy-6,36,12,6); c.stroke(); c.beginPath(); c.roundRect(cx-12,cy-3,26,6,3); c.stroke();
+      if(rev) arrow(c,470,240,470,190,C.pull,'Magnet pulls');
+    } },
+  { q:'What force made the apple fall from the tree?', watch:'Watch the apple on the tree.', ans:'Gravity', dur:2,
+    why:'The apple broke off its stem, and gravity pulled it down to the ground. Gravity pulls everything toward the Earth.',
+    draw(c,t,rev){
+      outdoor(c,392);
+      c.fillStyle='#8B5E34'; c.fillRect(345,200,40,192);
+      c.fillStyle='#4E9A3A'; [[365,170,90],[300,200,60],[430,200,62],[365,120,60]].forEach(([x,y,r])=>{ c.beginPath(); c.arc(x,y,r,0,Math.PI*2); c.fill(); });
+      const T1=.8, ax=470, ay0=232, tl=Math.sqrt(2*(380-ay0)/1100);
+      const wob=t<T1?Math.sin(t*30)*3*(t/T1):0;
+      const tt=clamp(t-T1,0,tl), ay=ay0+.5*1100*tt*tt;
+      c.strokeStyle='#5A3A1E'; c.lineWidth=3; if(t<T1) line(c,[ax,ay0-26],[ax+wob,ay0-12]);
+      c.fillStyle='#D63B3B'; c.strokeStyle=C.ink; c.lineWidth=2.5; c.beginPath(); c.arc(ax+wob,ay,13,0,Math.PI*2); c.fill(); c.stroke();
+      c.fillStyle='#3E9B3A'; c.beginPath(); c.ellipse(ax+wob+6,ay-14,6,3,-.5,0,Math.PI*2); c.fill();
+      if(t>T1 && tt<tl){ c.strokeStyle='rgba(27,42,74,.35)'; c.lineWidth=3; for(let i=0;i<3;i++) line(c,[ax-12+i*12,ay-22],[ax-12+i*12,ay-48]); }
+      if(rev) arrow(c,560,230,560,370,C.pull,'Gravity pulls down');
+    } },
+  { q:'The toy car rolled onto the rug and stopped. What force stopped it?', watch:'Watch the toy car roll.', ans:'Friction', dur:1.9,
+    why:'The rough rug rubs against the wheels. That friction slows the car down until it stops.',
+    draw(c,t,rev){
+      room(c);
+      c.fillStyle='#C2504A'; c.fillRect(260,392,480,10); c.fillStyle='#A63E39'; for(let x=264;x<736;x+=8) c.fillRect(x,394,3,3);
+      c.fillStyle='#E7C25C'; c.fillRect(256,390,4,12); c.fillRect(740,390,4,12);
+      const tt=Math.min(t,1.5), x=110+460*tt-150*tt*tt;
+      if(t<1.5){ c.strokeStyle='rgba(27,42,74,.35)'; c.lineWidth=3; for(let i=0;i<3;i++) line(c,[x-40,365+i*10],[x-70-i*8,365+i*10]); }
+      toyCar(c,x,392,'#3867D6',x/8);
+      if(rev) arrow(c,x+10,330,x-80,330,C.brown,'Friction');
+    } },
+  { q:'What force pulled the steel nail across the table?', watch:'Watch the magnet and the nail.', ans:'Magnetic', dur:2,
+    why:'The nail is made of steel, so the magnet pulls it, even before they touch. That is magnetic force.',
+    draw(c,t,rev){
+      room(c); table(c);
+      const mx=180+110*ease(t/.8);
+      const tipX=mx+56, nailRest=440;
+      const nx=nailRest+(tipX+30-nailRest)*ease((t-1)/.4);
+      magnet(c,mx,212,-Math.PI/2);
+      if(t>.8 && t<1.2){ c.strokeStyle='rgba(201,52,52,.35)'; c.lineWidth=2; c.setLineDash([4,5]); for(let i=0;i<3;i++){ c.beginPath(); c.arc(tipX,212,18+i*14,-Math.PI/2,Math.PI/2); c.stroke(); } c.setLineDash([]); }
+      c.strokeStyle='#7D8796'; c.lineWidth=5; c.lineCap='round'; line(c,[nx-30,244],[nx+30,244]); c.lineWidth=4; line(c,[nx-30,238],[nx-30,250]);
+      if(rev) arrow(c,520,200,450,200,C.pull,'Magnet pulls');
+    } }
+];
+
+function kidSVG(x,g,{lean=0,hands,feet,shirt=C.push,face=1}={}){
+  const hip=[x,g-34], sh=[x+lean,g-64], hd=[x+lean*1.25,g-79];
+  const f=feet||[[x-8,g],[x+8,g]];
+  const hs2=hands||[[sh[0]+6,sh[1]+26],[sh[0]-6,sh[1]+26]];
+  return `<g stroke-linecap="round" stroke-linejoin="round">
+    ${f.map(p=>`<line x1="${hip[0]}" y1="${hip[1]}" x2="${p[0]}" y2="${p[1]}" stroke="#2F3E66" stroke-width="6"/>`).join('')}
+    <line x1="${hip[0]}" y1="${hip[1]}" x2="${sh[0]}" y2="${sh[1]}" stroke="${shirt}" stroke-width="13"/>
+    ${hs2.map(p=>`<line x1="${sh[0]}" y1="${sh[1]+3}" x2="${p[0]}" y2="${p[1]}" stroke="#E0A987" stroke-width="5"/>`).join('')}
+    <circle cx="${hd[0]}" cy="${hd[1]}" r="11" fill="#F2C59E" stroke="${C.ink}" stroke-width="2"/>
+    <path d="M${hd[0]-11} ${hd[1]-1} a11 11 0 0 1 22 0 z" fill="${C.ink}"/>
+    <circle cx="${hd[0]+4*face}" cy="${hd[1]+2}" r="1.8" fill="${C.ink}"/>
+  </g>`;
+}
+const GRASS='<rect x="0" y="0" width="240" height="145" fill="#DDF0FA"/><rect x="0" y="145" width="240" height="15" fill="#9BD07F"/>';
+const FLOOR='<rect x="0" y="0" width="240" height="145" fill="#EEF1F6"/><rect x="0" y="145" width="240" height="15" fill="#D2AD80"/>';
+const K='stroke="#1B2A4A" stroke-width="2.5" stroke-linejoin="round"';
+const PICS=[
+  { cap:'Opening a drawer', ans:'pull', arrows:[[100,64,52,64]],
+    why:'You pull the handle toward you, and the drawer slides out toward you.',
+    svg:FLOOR+`<rect x="140" y="55" width="76" height="90" rx="4" fill="#C98B55" ${K}/><line x1="140" y1="85" x2="216" y2="85" ${K}/><line x1="140" y1="115" x2="216" y2="115" ${K}/><rect x="112" y="88" width="40" height="25" fill="#DDA36F" ${K}/><rect x="104" y="96" width="8" height="9" rx="2" fill="#1B2A4A"/><rect x="146" y="128" width="12" height="4" rx="2" fill="#1B2A4A"/>`+kidSVG(78,145,{lean:-7,hands:[[105,100],[103,97]]}) },
+  { cap:'Kicking a ball', ans:'push', arrows:[[150,104,205,104]],
+    why:'Your foot pushes the ball away from you.',
+    svg:GRASS+kidSVG(92,145,{lean:-3,feet:[[84,145],[116,134]],hands:[[70,96],[110,92]]})+`<circle cx="133" cy="131" r="11" fill="#fff" ${K}/><path d="M133 125 l5 4 -2 6 h-6 l-2 -6z" fill="#1B2A4A"/><line x1="150" y1="126" x2="166" y2="126" stroke="#8FA0B8" stroke-width="2.5" stroke-linecap="round"/><line x1="150" y1="134" x2="170" y2="134" stroke="#8FA0B8" stroke-width="2.5" stroke-linecap="round"/>` },
+  { cap:'Pushing a shopping cart', ans:'push', arrows:[[150,46,205,46]],
+    why:'You push the cart away from you so it rolls forward.',
+    svg:FLOOR+`<path d="M120 78 L208 78 L198 118 L130 118 Z" fill="#DCE6EF" ${K}/><path d="M142 78 L145 118 M164 78 L164 118 M186 78 L182 118 M124 98 L203 98" stroke="#8FA0B8" stroke-width="1.5" fill="none"/><path d="M120 78 L109 70" ${K} fill="none"/><path d="M130 118 L132 132 L196 132 L198 118" ${K} fill="none"/><circle cx="138" cy="138" r="6" fill="#1B2A4A"/><circle cx="190" cy="138" r="6" fill="#1B2A4A"/>`+kidSVG(82,145,{lean:10,hands:[[109,71],[107,74]]}) },
+  { cap:'Playing tug of war', ans:'pull', arrows:[[100,40,56,40],[140,40,184,40]],
+    why:'Each team pulls the rope toward themselves.',
+    svg:GRASS+`<path d="M44 95 L196 93" stroke="#B07A3F" stroke-width="4" stroke-linecap="round"/><path d="M120 94 L114 110 L126 110 Z" fill="#C93434"/>`+kidSVG(58,145,{lean:-11,hands:[[74,95],[80,95]]})+kidSVG(182,145,{lean:11,face:-1,shirt:C.pull,hands:[[166,93],[160,93]]}) },
+  { cap:'Pressing a lift button', ans:'push', arrows:[[110,50,146,50]],
+    why:'Your finger pushes the button away from you, into the wall.',
+    svg:FLOOR+`<rect x="150" y="18" width="90" height="127" fill="#D3D9E2" ${K}/><rect x="172" y="42" width="56" height="103" fill="#B5BFCC" ${K}/><line x1="200" y1="42" x2="200" y2="145" ${K}/><rect x="154" y="80" width="12" height="22" rx="2" fill="#fff" ${K}/><circle cx="160" cy="86" r="3.5" fill="#FFC93C"/><circle cx="160" cy="96" r="3.5" fill="#C9CFD9"/>`+kidSVG(128,145,{lean:2,hands:[[156,86],[124,110]]}) },
+  { cap:'Pulling a wagon', ans:'pull', arrows:[[108,64,148,64]],
+    why:'The kid pulls the handle, so the wagon comes along toward them.',
+    svg:GRASS+`<rect x="28" y="106" width="74" height="22" rx="3" fill="#C93434" ${K}/><circle cx="42" cy="134" r="9" fill="#1B2A4A"/><circle cx="88" cy="134" r="9" fill="#1B2A4A"/><line x1="102" y1="116" x2="144" y2="98" ${K}/>`+kidSVG(166,145,{lean:6,feet:[[156,145],[176,145]],hands:[[144,98],[184,106]],shirt:C.pull}) },
+  { cap:'Pushing a friend on a swing', ans:'push', arrows:[[182,68,228,68]],
+    why:'Your hands push the swing away from you.',
+    svg:GRASS+`<path d="M122 145 L140 18 L226 18 L236 145" fill="none" stroke="#6B4E2E" stroke-width="5" stroke-linejoin="round"/><line x1="160" y1="18" x2="148" y2="104" stroke="#6B4E2E" stroke-width="2"/><line x1="192" y1="18" x2="180" y2="104" stroke="#6B4E2E" stroke-width="2"/><rect x="142" y="102" width="44" height="7" rx="2" fill="#FFC93C" ${K}/><line x1="165" y1="100" x2="165" y2="84" stroke="#127F8E" stroke-width="11" stroke-linecap="round"/><line x1="165" y1="102" x2="182" y2="112" stroke="#2F3E66" stroke-width="5" stroke-linecap="round"/><circle cx="165" cy="72" r="9" fill="#F2C59E" ${K}/>`+kidSVG(106,145,{lean:11,hands:[[142,98],[144,94]]}) },
+  { cap:'Pulling a carrot out of the ground', ans:'pull', arrows:[[172,104,172,52]],
+    why:'You pull the carrot up and out of the soil, toward you.',
+    svg:`<rect x="0" y="0" width="240" height="120" fill="#DDF0FA"/><rect x="0" y="120" width="240" height="40" fill="#9B6B43"/><path d="M144 104 L166 104 L156 140 Z" fill="#F08A24" ${K}/><path d="M152 104 C146 92 140 88 138 84 M155 104 C155 92 156 86 158 80 M158 104 C164 94 170 90 174 88" stroke="#3E9B3A" stroke-width="4" fill="none" stroke-linecap="round"/>`+kidSVG(124,120,{lean:-9,hands:[[151,100],[155,102]]}) },
+  { cap:'Reeling in a fish', ans:'pull', arrows:[[222,122,222,70]],
+    why:'The fishing line pulls the fish up and toward the kid.',
+    svg:`<rect x="0" y="0" width="240" height="160" fill="#DDF0FA"/><rect x="0" y="120" width="130" height="40" fill="#9BD07F"/><path d="M122 112 Q150 106 180 112 T240 110 L240 160 L122 160 Z" fill="#6EC6E6"/><line x1="80" y1="92" x2="178" y2="26" stroke="#6B4E2E" stroke-width="3.5" stroke-linecap="round"/><line x1="178" y1="26" x2="198" y2="124" stroke="#1B2A4A" stroke-width="1.2"/><ellipse cx="200" cy="132" rx="14" ry="7" fill="#F08A24" ${K}/><path d="M186 132 L176 126 L176 138 Z" fill="#F08A24" ${K}/>`+kidSVG(62,120,{lean:-4,hands:[[80,92],[86,88]],shirt:C.pull}) },
+  { cap:'Hammering a nail', ans:'push', arrows:[[206,58,206,104]],
+    why:'The hammer pushes the nail down into the wood, away from you.',
+    svg:FLOOR+`<rect x="118" y="118" width="104" height="27" fill="#D8A565" ${K}/><line x1="175" y1="98" x2="175" y2="120" stroke="#6F7A89" stroke-width="3"/><line x1="169" y1="98" x2="181" y2="98" stroke="#6F7A89" stroke-width="3" stroke-linecap="round"/><line x1="132" y1="94" x2="172" y2="82" stroke="#8C5A2B" stroke-width="5" stroke-linecap="round"/><rect x="164" y="70" width="22" height="16" rx="2" fill="#7D8796" ${K}/>`+kidSVG(106,145,{lean:3,hands:[[132,94],[136,92]]}) }
+];
+function picSVG(p, reveal){
+  const col=p.ans==='push'?C.push:C.pull;
+  const arrows = reveal ? p.arrows.map(([x1,y1,x2,y2])=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${col}" stroke-width="7" stroke-linecap="round" marker-end="url(#ah)"/>`).join('') : '';
+  return `<svg viewBox="0 0 240 160" role="img" aria-label="${p.cap}" xmlns="http://www.w3.org/2000/svg">
+    <defs><marker id="ah" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="3" markerHeight="3" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="${col}"/></marker></defs>
+    <rect x="0.5" y="0.5" width="239" height="159" rx="8" fill="none" stroke="#1B2A4A" stroke-width="1"/>
+    ${p.svg}${arrows}</svg>`;
+}
+
+/* rough or smooth: two surfaces, same push */
+const SURF_Q={
+  ice:{ n:'Ice', kind:'smooth', d:.4 }, tiles:{ n:'Tiles', kind:'smooth', d:1.2 }, wood:{ n:'Wooden floor', kind:'smooth', d:1.5 },
+  asphalt:{ n:'Road', kind:'fairly smooth', d:2.4 }, carpet:{ n:'Carpet', kind:'rough', d:4 }, grass:{ n:'Grass', kind:'rough', d:4.5 },
+  mud:{ n:'Mud', kind:'sticky', d:5.5 }, sand:{ n:'Sand', kind:'rough', d:6 }
+};
+function paintSurface(c,type,x,y,w,h){
+  const fills={ice:'#D8F2FB',tiles:'#F4F6F9',wood:'#C99567',asphalt:'#59606F',carpet:'#C2504A',grass:'#6DBE4B',mud:'#8E6C4A',sand:'#EACF88'};
+  c.save(); c.beginPath(); c.rect(x,y,w,h); c.clip();
+  c.fillStyle=fills[type]; c.fillRect(x,y,w,h);
+  if(type==='ice'){ c.strokeStyle='#fff'; c.lineWidth=3; for(let i=x+10;i<x+w;i+=46) line(c,[i,y+h-6],[i+16,y+6]); }
+  if(type==='tiles'){ c.strokeStyle='#C9D1DB'; c.lineWidth=2; for(let i=x;i<x+w;i+=40) line(c,[i,y],[i,y+h]); }
+  if(type==='wood'){ c.strokeStyle='#A8754A'; c.lineWidth=2; for(let i=x;i<x+w;i+=70) line(c,[i,y],[i,y+h]); line(c,[x,y+h/2],[x+w,y+h/2]); }
+  if(type==='asphalt'){ c.fillStyle='#7A8190'; for(let i=0;i<120;i++) c.fillRect(x+((i*37)%w),y+((i*13)%h),2,2); }
+  if(type==='carpet'){ c.fillStyle='#A63E39'; for(let i=x+2;i<x+w;i+=7) for(let j=y+3;j<y+h;j+=7) c.fillRect(i,j,3,3); }
+  if(type==='grass'){ c.strokeStyle='#4E9A33'; c.lineWidth=2; for(let i=x+3;i<x+w;i+=8) line(c,[i,y+h],[i+3,y+4]); }
+  if(type==='mud'){ c.fillStyle='#6E5035'; for(let i=0;i<30;i++){ c.beginPath(); c.ellipse(x+((i*47)%w),y+6+((i*11)%(h-10)),9,3,0,0,Math.PI*2); c.fill(); } }
+  if(type==='sand'){ c.fillStyle='#C9A85E'; for(let i=0;i<160;i++) c.fillRect(x+((i*29)%w),y+((i*17)%h),2,2); }
+  c.restore();
+  c.strokeStyle=C.ink; c.lineWidth=2.5; c.strokeRect(x,y,w,h);
+}
+const PAIRS=[
+  { a:'carpet', b:'ice', why:'Ice is smooth, so there is very little friction and the car rolls much farther. The rough carpet rubs on the wheels and stops the car quickly.' },
+  { a:'tiles', b:'grass', why:'Smooth tiles have less friction than rough grass, so the car on tiles rolls farther.' },
+  { a:'sand', b:'wood', why:'A smooth wooden floor has much less friction than rough sand. Sand grabs the wheels and stops the car fast.' },
+  { a:'mud', b:'asphalt', why:'The road is smoother than sticky mud. Less friction means the car keeps rolling farther.' },
+  { a:'ice', b:'tiles', why:'Both are smooth, but ice is even smoother than tiles. Less friction means the car on ice goes farther.' },
+  { a:'wood', b:'carpet', why:'The smooth wooden floor has less friction than the rough carpet, so that car rolls farther.' }
+];
+function pairDistance(type,t){ const v0=380, a=60+SURF_Q[type].d*60, ts=v0/a, tt=Math.min(t,ts); return Math.min(615, v0*tt-.5*a*tt*tt); }
+
+const QUIZ_LEVELS=[
+  { name:'Name the force', intro:'Watch 6 short scenes. After each one, choose the force: friction, gravity or magnetic.' },
+  { name:'Push or pull?', intro:'Look at 10 pictures. Decide if each one shows a push or a pull.' },
+  { name:'Rough or smooth?', intro:'Two toy cars get the same push on different floors. Guess which car rolls farther, then watch what happens. Smooth surfaces have less friction.' }
+];
+const Quiz = {
+  id:'quiz', name:'Force Quiz', usesKeys:false,
+  title:'Force quiz',
+  lesson:'Level 1: name the force (friction, gravity or magnetic). Level 2: push or pull? Level 3: which surface has less friction?',
+  levels:QUIZ_LEVELS, lv:0,
+  init(quick){
+    this.i=0; this.score=0; this.t=0; this.answered=null; this.phase='quiz'; this.done=false; pic.hidden=true;
+    if(this.lv===0) this.qs=shuffle(SCENES.map(s=>({type:'scene',s})));
+    else if(this.lv===1) this.qs=shuffle(PICS.slice()).map(p=>({type:'pic',p}));
+    else this.qs=shuffle(PAIRS.map(p=>Math.random()<.5?{...p}:{...p,a:p.b,b:p.a})).map(p=>({type:'pair',p}));
+    setHud([['part','Level'],['q','Question'],['score','Score']]);
+    this.start();
+    if(!quick) showOverlay({ title:`Level ${this.lv+1}: ${this.levels[this.lv].name}`, text:this.levels[this.lv].intro, btn:'Start', onBtn:()=>{ this.t=0; } });
+  },
+  hudUpdate(){
+    hs('part', `${this.lv+1} · ${this.levels[this.lv].name}`);
+    hs('q', `${Math.min(this.i+1,this.qs.length)} / ${this.qs.length}`);
+    hs('score', `${this.score} / ${this.qs.length}`);
+  },
+  shell(promptText){
+    ctr.innerHTML='';
+    const box=el('div','qbox');
+    this.prompt=el('p','qprompt',promptText);
+    this.row=el('div','ansrow'); this.btns=[];
+    this.fb=el('p','fb'); this.fb.hidden=true;
+    this.nextRow=el('div','ansrow');
+    box.append(this.prompt,this.row,this.fb,this.nextRow); ctr.append(box);
+  },
+  answerBtn(label,key,cls,onPick){ const b=el('button','big '+cls,label); b.type='button'; b.dataset.k=key; b.addEventListener('click',()=>onPick(key,b)); this.row.append(b); this.btns.push(b); return b; },
+  start(){
+    this.t=0; this.answered=null;
+    const q=this.qs[this.i];
+    if(q.type==='scene'){
+      pic.hidden=true; this.shell(q.s.watch);
+      ['Friction','Gravity','Magnetic'].forEach(k=>{ this.answerBtn(k+' force',k,'plain',(k,b)=>this.answer(k,b)).disabled=true; });
+      const again=el('button','big plain','Watch again'); again.type='button'; again.addEventListener('click',()=>{ this.t=0; }); this.row.append(again);
+    } else if(q.type==='pic'){
+      pic.hidden=false; pic.innerHTML=picSVG(q.p,false)+`<div class="cap">${q.p.cap}</div>`;
+      this.shell('Is this a push or a pull?');
+      this.answerBtn('Push','push','push',(k,b)=>this.answer(k,b));
+      this.answerBtn('Pull','pull','pull',(k,b)=>this.answer(k,b));
+    } else {
+      pic.hidden=true; this.shell('Both cars get the same push. Which car will roll farther?');
+      this.answerBtn(`Car A on ${SURF_Q[q.p.a].n.toLowerCase()}`,'a','plain',(k,b)=>this.answer(k,b));
+      this.answerBtn(`Car B on ${SURF_Q[q.p.b].n.toLowerCase()}`,'b','plain',(k,b)=>this.answer(k,b));
+    }
+    this.hudUpdate();
+  },
+  correctKey(q){
+    if(q.type==='scene') return q.s.ans;
+    if(q.type==='pic') return q.p.ans;
+    return SURF_Q[q.p.a].d < SURF_Q[q.p.b].d ? 'a' : 'b';
+  },
+  answer(k,b){
+    if(this.answered) return;
+    const q=this.qs[this.i], right=this.correctKey(q); this.answered=k;
+    const ok=k===right; if(ok){ this.score++; sfx.good(); } else sfx.bad();
+    this.btns.forEach(x=>{ x.disabled=true; if(x.dataset.k===right) x.className='big right'; else if(x===b) x.className='big wrong'; });
+    let wrongMsg, why;
+    if(q.type==='scene'){ wrongMsg=`Not quite. It's ${right.toLowerCase()} force. `; why=q.s.why; }
+    else if(q.type==='pic'){ wrongMsg=`Not quite. It's a ${right}. `; why=q.p.why; pic.innerHTML=picSVG(q.p,true)+`<div class="cap">${q.p.cap}</div>`; }
+    else { const rs=SURF_Q[q.p[right]]; wrongMsg=`Not quite. The car on ${rs.n.toLowerCase()} goes farther. `; why=q.p.why; this.t=0; }
+    this.fb.className='fb '+(ok?'good':'bad'); this.fb.innerHTML=''; this.fb.append(el('b',null,ok?'Correct! ':wrongMsg), document.createTextNode(why)); this.fb.hidden=false;
+    if(q.type==='pair'){ const again=el('button','big plain','Watch again'); again.type='button'; again.addEventListener('click',()=>{ this.t=0; }); this.row.append(again); }
+    const n=el('button','big','Next →'); n.type='button';
+    n.addEventListener('click',()=>{ this.i++; if(this.i<this.qs.length) this.start(); else this.finish(); });
+    this.nextRow.innerHTML=''; this.nextRow.append(n); setTimeout(()=>n.focus({preventScroll:true}),30);
+    this.hudUpdate();
+  },
+  finish(){
+    const n=this.qs.length, f=this.score/n, s=f>=.9?3:f>=.66?2:1;
+    sfx.win(); this.done=true; ctr.innerHTML=''; pic.hidden=true;
+    const msgs=['You can spot friction, gravity and magnetic force.','You can tell pushes from pulls.','You know that smooth surfaces have less friction than rough ones.'];
+    levelDone(this,{ title:`You scored ${this.score} out of ${n}`, stars:s, text: s===3 ? `Force expert! ${msgs[this.lv]}` : 'Good try. Play again to earn more stars.' });
+  },
+  update(dt){
+    if(!ov.hidden || this.done) return;
+    this.t+=dt;
+    const q=this.qs[this.i];
+    if(q.type==='scene' && this.t>=q.s.dur && !this.answered && this.btns[0].disabled){ this.btns.forEach(b=>b.disabled=false); this.prompt.textContent=q.s.q; }
+  },
+  draw(c){
+    const q=this.qs && this.qs[this.i];
+    if(this.done || !q || q.type==='pic'){ c.fillStyle='#F3F8FB'; c.fillRect(0,0,W,H); return; }
+    if(q.type==='scene'){ q.s.draw(c,this.t,!!this.answered); return; }
+    // pair
+    c.fillStyle='#EEF3F8'; c.fillRect(0,0,W,H);
+    const lanes=[['a',190],['b',350]];
+    lanes.forEach(([k,y])=>{
+      const type=q.p[k];
+      paintSurface(c,type,60,y,700,26);
+      c.fillStyle='#C93434'; c.fillRect(760,y-34,10,60);
+      labelBox(c,`Car ${k.toUpperCase()} · ${SURF_Q[type].n} (${SURF_Q[type].kind})`,180,y-56,C.ink,16);
+      const d=this.answered?pairDistance(type,this.t):0;
+      toyCar(c,110+d,y,k==='a'?'#3867D6':'#F08A24',d/8);
+      if(this.answered){ c.strokeStyle='rgba(27,42,74,.5)'; c.lineWidth=2; c.setLineDash([5,5]); line(c,[110+d,y+32],[110+d,y+44]); c.setLineDash([]); smallText(c,Math.round(d/65*10)/10+' m',110+d,y+60,C.ink); }
+    });
+    if(!this.answered) arrow(c,24,270,90,270,C.push,null,8);
+    if(!this.answered) smallText(c,'same push',60,300,C.push);
+  }
+};
+
+/* ---------- game + level switching ---------- */
+const GAMES=[RockLevel,CarLevel,BallLevel,Quiz];
+const tabs=document.getElementById('tabs');
+function gameStars(G){ return G.levels.reduce((a,_,i)=>a+getBest(G.id,i),0); }
+function renderTabs(){
+  tabs.innerHTML='';
+  GAMES.forEach((G,i)=>{
+    const b=el('button','lv'); b.type='button'; b.setAttribute('role','tab'); b.setAttribute('aria-selected', cur===G?'true':'false');
+    b.append(el('span','n','Game '+(i+1)), el('span','t',G.name), el('span','s',`★ ${gameStars(G)} / 9`));
+    b.addEventListener('click',()=>go(i));
+    tabs.append(b);
+  });
+  const total=GAMES.reduce((a,G)=>a+gameStars(G),0);
+  document.getElementById('starTotal').innerHTML=`<span class="st">★</span> ${total} / 36`;
+}
+function renderLevelPicker(){
+  lvPick.innerHTML='';
+  if(!cur) return;
+  cur.levels.forEach((L,i)=>{
+    const b=el('button','lp'); b.type='button'; b.setAttribute('aria-pressed', cur.lv===i?'true':'false');
+    b.append(el('span','a','Level '+(i+1)), el('span','b',L.name), el('span','c',starStr(getBest(cur.id,i))));
+    b.addEventListener('click',()=>setLevel(i));
+    lvPick.append(b);
+  });
+}
+function setLevel(i){
+  for(const k in keys) keys[k]=false;
+  hideOverlay(); pic.hidden=true;
+  cur.lv=i; renderLevelPicker(); cur.init();
+}
+function go(i){
+  for(const k in keys) keys[k]=false;
+  hideOverlay(); pic.hidden=true;
+  cur=GAMES[i];
+  document.getElementById('lvTitle').textContent=cur.title;
+  document.getElementById('lvLesson').textContent=cur.lesson;
+  renderTabs(); renderLevelPicker();
+  cur.init();
+}
+
+let last=performance.now();
+function frame(t){
+  const dt=Math.min(.04,(t-last)/1000); last=t;
+  ctx.setTransform(cv.width/W,0,0,cv.height/H,0,0);
+  if(cur){ cur.update(dt); cur.draw(ctx); }
+  requestAnimationFrame(frame);
+}
+go(0);
+requestAnimationFrame(frame);
+})();
+</script>
+
+</body></html>
